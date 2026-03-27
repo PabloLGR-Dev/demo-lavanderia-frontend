@@ -33,7 +33,7 @@ import FacturasComponents from '@/components/FacturasComponents';
 import PrintFactura from '@/components/PrintFactura';
 import { useRolePermissions } from '@/hooks/Userolepermissions'; // Importar hook de permisos
 
-// Constantes para estados de factura
+// Constantes para estados de factura.
 const ESTADOS_FACTURA = {
     PENDIENTE: 4,
     PAGADO: 5,

@@ -59,7 +59,7 @@ export default function DashboardLayout({
 
     // Verificar acceso a la ruta actual
     useEffect(() => {
-        if (!isLoading && isAuthenticated && pathname) {
+        if (!isLoading && !configLoading && isAuthenticated && pathname) {
             // Si estamos en la página de entregas y el control está desactivado, redirigir
             if (pathname === '/dashboard/entregas' && !config.controlEntregasActivo) {
                 toast.error('El control de entregas está desactivado');
@@ -72,7 +72,7 @@ export default function DashboardLayout({
                 router.push('/dashboard');
             }
         }
-    }, [pathname, idRol, isAuthenticated, isLoading, router, config.controlEntregasActivo]);
+    }, [pathname, idRol, isAuthenticated, isLoading, configLoading, router, config.controlEntregasActivo]);
 
     const handleLogout = () => {
         logout();
@@ -168,10 +168,14 @@ export default function DashboardLayout({
                 <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-cyan-100">
                     <div className="flex items-center justify-between px-4 py-4">
                         <button
+                            type="button"
+                            aria-label={sidebarOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+                            aria-expanded={sidebarOpen}
                             onClick={() => setSidebarOpen(!sidebarOpen)}
                             className="p-2 rounded-lg hover:bg-cyan-50 lg:hidden transition-colors"
                         >
                             <svg
+                                aria-hidden="true"
                                 className="w-6 h-6 text-cyan-600"
                                 fill="none"
                                 stroke="currentColor"

@@ -371,14 +371,6 @@ const PrintFactura: React.FC<PrintFacturaProps> = ({ factura, isOpen, onClose })
             </head>
             <body>
                 ${fullContent}
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        setTimeout(() => {
-                            document.body.removeChild(window.frameElement);
-                        }, 1000);
-                    };
-                </script>
             </body>
             </html>
         `);
@@ -413,7 +405,7 @@ const PrintFactura: React.FC<PrintFacturaProps> = ({ factura, isOpen, onClose })
         printWindow.onload = () => {
             printWindow.contentWindow?.print();
             setTimeout(() => {
-                document.body.removeChild(printWindow);
+                printWindow.remove();
                 setIsPrinting(false);
             }, 1000);
         };

@@ -119,7 +119,9 @@ export function hasAccessToRoute(userRole: number | null | undefined, route: str
     if (!allowedRoutes) return false;
 
     return allowedRoutes.some(allowedRoute =>
-        route === allowedRoute || route.startsWith(allowedRoute + '/')
+        allowedRoute === '/dashboard'
+            ? route === allowedRoute
+            : route === allowedRoute || route.startsWith(`${allowedRoute}/`)
     );
 }
 

@@ -5,8 +5,12 @@ import { API_ENDPOINTS } from '@/lib/api';
 import { ConfiguracionesGenerales } from '@/types';
 import { toast } from 'sonner';
 import { Package, Truck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function ConfiguracionPage() {
+
+    const router = useRouter();
+
     const [config, setConfig] = useState<ConfiguracionesGenerales>({
         controlStockActivo: false,
         controlEntregasActivo: false,
@@ -42,10 +46,13 @@ export default function ConfiguracionPage() {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             if (response.ok) {
                 const data = await response.json();
                 toast.success(data.mensaje);
+
                 fetchConfiguracion();
+                router.refresh();
             }
         } catch (error) {
             console.error('Error:', error);
@@ -60,10 +67,13 @@ export default function ConfiguracionPage() {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             if (response.ok) {
                 const data = await response.json();
                 toast.success(data.mensaje);
+
                 fetchConfiguracion();
+                router.refresh();
             }
         } catch (error) {
             console.error('Error:', error);

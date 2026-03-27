@@ -21,26 +21,40 @@ export default function ServiciosPage() {
     });
 
     useEffect(() => {
-        fetchServicios();
+        const controller = new AbortController();
+        fetchServicios(controller.signal);
+
+        return () => {
+            controller.abort();
+        };
     }, [searchTerm]);
 
-    const fetchServicios = async () => {
+    const fetchServicios = async (signal?: AbortSignal) => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('accessToken');
+
             const url = searchTerm
-                ? `${API_ENDPOINTS.SERVICIOS}?search=${searchTerm}`
+                ? `${API_ENDPOINTS.SERVICIOS}?search=${encodeURIComponent(searchTerm)}`
                 : API_ENDPOINTS.SERVICIOS;
 
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` },
+                signal,
             });
+
             if (response.ok) {
                 const data = await response.json();
                 setServicios(data);
             } else {
                 toast.error('Error al cargar servicios');
             }
-        } catch (error) {
+        } catch (error: any) {
+            if (error.name === 'AbortError') {
+                // Request cancelado, no hacer nada
+                return;
+            }
+
             console.error('Error:', error);
             toast.error('Error de conexión al cargar servicios');
         } finally {

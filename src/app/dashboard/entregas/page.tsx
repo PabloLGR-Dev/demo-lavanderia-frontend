@@ -171,12 +171,18 @@ export default function EntregasPage() {
             isProcessingRef.current = true;
             setLoadingFacturaId(id);
             setActionType('detail');
+            setFacturaDetalle(null);
 
             // ABRIR MODAL INMEDIATAMENTE
             setShowDetailModal(true);  // ← Usuario ve el modal instantáneamente
 
             // Cargar datos en paralelo (background)
             await fetchFacturaDetalle(id);
+            const detalle = await fetchFacturaDetalle(id);
+            if (!detalle) {
+                setShowDetailModal(false);
+                return;
+            }
 
         } catch (error) {
             console.error('Error:', error);
