@@ -226,7 +226,6 @@ export default function FacturasPage() {
 
     // ==================== EFECTOS ====================
     useEffect(() => {
-        fetchFacturasResumen();
         fetchClientes();
         fetchProximasEntregas();
     }, []);
@@ -236,8 +235,11 @@ export default function FacturasPage() {
             fetchFacturasResumen();
         }, 500);
         return () => clearTimeout(delaySearch);
+    }, [filtros.search]);
+
+    useEffect(() => {
+        fetchFacturasResumen();
     }, [
-        filtros.search,
         filtros.estadoId,
         filtros.fechaDesde,
         filtros.fechaHasta,
