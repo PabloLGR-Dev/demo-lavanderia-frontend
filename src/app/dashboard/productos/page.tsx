@@ -64,6 +64,12 @@ export default function ProductosPage() {
     }, []);
 
     // Cargar productos cuando cambie el término de búsqueda debounced, la categoría, página o items por página
+    // Resetear a página 1 cuando cambian filtros
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearchTerm, selectedCategoria]);
+
+// Fetch cuando cambien parámetros
     useEffect(() => {
         fetchProductos();
     }, [debouncedSearchTerm, selectedCategoria, currentPage, itemsPerPage]);
