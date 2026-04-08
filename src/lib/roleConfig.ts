@@ -1,8 +1,8 @@
 // src/lib/roleConfig.ts
 
 export const ROLES = {
-    ADMIN: 2,
-    EMPLEADO: 3,
+    ADMIN: 1,
+    EMPLEADO: 2,
 } as const;
 
 export type RoleId = typeof ROLES[keyof typeof ROLES];
