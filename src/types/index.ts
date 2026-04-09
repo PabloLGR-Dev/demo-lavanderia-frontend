@@ -351,6 +351,7 @@ export interface CategoriaGasto {
     color?: string;
     idEstado: number;
     fechaCreacion: string;
+    montoPredefinido?: number | null;
     gastos?: Gasto[];
     idEstadoNavigation?: Estado;
 }

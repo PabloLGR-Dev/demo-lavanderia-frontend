@@ -36,9 +36,9 @@ const formatCurrency = (amount: number): string => {
 type FiltroEntrega = 'todas' | 'pendientes' | 'parciales' | 'completadas';
 
 const ESTADOS_ENTREGA = {
-    PENDIENTE: 31,
-    COMPLETADA: 32,
-    PARCIAL: 33
+    PENDIENTE: 7,
+    COMPLETADA: 8,
+    PARCIAL: 9
 };
 
 interface ContadoresEntregas {

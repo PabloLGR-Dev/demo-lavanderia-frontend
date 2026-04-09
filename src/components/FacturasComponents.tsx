@@ -658,9 +658,14 @@ export default function FacturasComponents({
             return;
         }
 
-        const createdFactura = await createFactura(dto);
-        if (createdFactura) {
-            onFacturaCreada(createdFactura);
+        // AQUÍ ESTÁ EL CAMBIO 👇
+        const responseData = await createFactura(dto);
+        if (responseData && responseData.idFactura) {
+            // Buscamos la factura completa con todos sus datos antes de mostrar el modal
+            const facturaCompleta = await fetchFacturaDetalles(responseData.idFactura);
+            if (facturaCompleta) {
+                onFacturaCreada(facturaCompleta);
+            }
         }
     };
 
@@ -688,9 +693,14 @@ export default function FacturasComponents({
             referenciaPago: confirmationFormLocal.referenciaPago || null,
         };
 
-        const createdFactura = await createFactura(dto);
-        if (createdFactura) {
-            onFacturaCreada(createdFactura);
+        // AQUÍ ESTÁ EL CAMBIO 👇
+        const responseData = await createFactura(dto);
+        if (responseData && responseData.idFactura) {
+            // Buscamos la factura completa con todos sus datos antes de mostrar el modal
+            const facturaCompleta = await fetchFacturaDetalles(responseData.idFactura);
+            if (facturaCompleta) {
+                onFacturaCreada(facturaCompleta);
+            }
         }
     };
 

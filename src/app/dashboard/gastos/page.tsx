@@ -66,6 +66,7 @@ interface CategoriaResumen {
     idEstado: number;
     estado: string;
     fechaCreacion: string;
+    montoPredefinido?: number | null;
     totalGastos: number;
     montoTotalGastos: number;
 }
@@ -130,6 +131,7 @@ export default function GastosPage() {
         descripcion: '',
         color: '#6B7280',
         idEstado: 1,
+        montoPredefinido: '',
     });
 
     // ==================== EFECTOS ====================
@@ -430,6 +432,7 @@ export default function GastosPage() {
                     descripcion: categoriaForm.descripcion || undefined,
                     color: categoriaForm.color,
                     idEstado: categoriaForm.idEstado,
+                    montoPredefinido: categoriaForm.montoPredefinido ? parseFloat(categoriaForm.montoPredefinido) : null,
                 }),
             });
 
@@ -520,6 +523,7 @@ export default function GastosPage() {
             descripcion: '',
             color: '#6B7280',
             idEstado: 1,
+            montoPredefinido: '',
         });
     };
 
@@ -545,6 +549,7 @@ export default function GastosPage() {
             descripcion: categoria.descripcion || '',
             color: categoria.color || '#6B7280',
             idEstado: categoria.idEstado,
+            montoPredefinido: categoria.montoPredefinido ? categoria.montoPredefinido.toString() : '',
         });
         setShowModalCategoria(true);
     };
@@ -909,15 +914,16 @@ export default function GastosPage() {
                     <div className="overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="bg-gradient-to-r from-cyan-50 to-blue-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Color</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Nombre</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Descripción</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Total Gastos</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Monto Total</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Estado</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Acciones</th>
-                            </tr>
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Color</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Nombre</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Descripción</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Monto Predef.</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Total Gastos</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Monto Total</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Estado</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Acciones</th>
+                                </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
                             {categoriasResumen.length === 0 ? (
@@ -941,6 +947,15 @@ export default function GastosPage() {
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">
                                             {categoria.descripcion || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm">
+                                            {categoria.montoPredefinido ? (
+                                                <span className="font-semibold text-cyan-600">
+                                                    {formatCurrency(categoria.montoPredefinido)}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 italic">Variable</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
                                             <div className="flex items-center gap-2">
@@ -1052,7 +1067,17 @@ export default function GastosPage() {
                                 <select
                                     required
                                     value={gastoForm.idCategoriaGasto}
-                                    onChange={(e) => setGastoForm({ ...gastoForm, idCategoriaGasto: parseInt(e.target.value) })}
+                                    onChange={(e) => {
+                                        const catId = parseInt(e.target.value);
+                                        const categoriaSeleccionada = categorias.find(c => c.idCategoriaGasto === catId);
+                                        
+                                        setGastoForm({ 
+                                            ...gastoForm, 
+                                            idCategoriaGasto: catId,
+                                            // CORRECCIÓN: Si hay monto predefinido lo usa, si no, se limpia a 0
+                                            monto: categoriaSeleccionada?.montoPredefinido || 0
+                                        });
+                                    }}
                                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
                                 >
                                     <option value={0}>Seleccionar categoría...</option>
@@ -1177,6 +1202,24 @@ export default function GastosPage() {
                                     rows={2}
                                     placeholder="Descripción de la categoría..."
                                 />
+                            </div>
+
+                            {/* INPUT DE MONTO PREDEFINIDO */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-gray-700">Monto Predefinido (Opcional)</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-2 text-gray-500">$</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={categoriaForm.montoPredefinido}
+                                        onChange={(e) => setCategoriaForm({ ...categoriaForm, montoPredefinido: e.target.value })}
+                                        className="w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
+                                        placeholder="Ej: 1500.00"
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Si se establece, se autocompletará al registrar un gasto en esta categoría.</p>
                             </div>
 
                             <div>
