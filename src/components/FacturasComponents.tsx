@@ -616,6 +616,19 @@ export default function FacturasComponents({
         }
     };
 
+    const handlePostFacturaCreada = async (idFactura: number) => {
+        const facturaCompleta = await fetchFacturaDetalles(idFactura);
+        if (facturaCompleta) {
+            onFacturaCreada(facturaCompleta);
+            return;
+        }
+
+        // Fallback: creation succeeded, but detail fetch failed
+        toast.warning('La factura se creó, pero no se pudieron cargar los detalles. Ábrela desde la lista.');
+        fetchFacturasResumen();
+    };
+
+
     const handleConfirmCreation = async () => {
         if (!preparedFacturaDto) return;
 
@@ -660,12 +673,8 @@ export default function FacturasComponents({
 
         // AQUÍ ESTÁ EL CAMBIO 👇
         const responseData = await createFactura(dto);
-        if (responseData && responseData.idFactura) {
-            // Buscamos la factura completa con todos sus datos antes de mostrar el modal
-            const facturaCompleta = await fetchFacturaDetalles(responseData.idFactura);
-            if (facturaCompleta) {
-                onFacturaCreada(facturaCompleta);
-            }
+        if (responseData?.idFactura) {
+            await handlePostFacturaCreada(responseData.idFactura);
         }
     };
 
@@ -695,12 +704,8 @@ export default function FacturasComponents({
 
         // AQUÍ ESTÁ EL CAMBIO 👇
         const responseData = await createFactura(dto);
-        if (responseData && responseData.idFactura) {
-            // Buscamos la factura completa con todos sus datos antes de mostrar el modal
-            const facturaCompleta = await fetchFacturaDetalles(responseData.idFactura);
-            if (facturaCompleta) {
-                onFacturaCreada(facturaCompleta);
-            }
+        if (responseData?.idFactura) {
+            await handlePostFacturaCreada(responseData.idFactura);
         }
     };
 
