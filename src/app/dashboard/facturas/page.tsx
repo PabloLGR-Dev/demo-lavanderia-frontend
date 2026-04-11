@@ -32,6 +32,7 @@ import { es } from 'date-fns/locale';
 import FacturasComponents from '@/components/FacturasComponents';
 import PrintFactura from '@/components/PrintFactura';
 import { useRolePermissions } from '@/hooks/Userolepermissions'; // Importar hook de permisos
+import CalculadoraCambioModal from '@/components/CalculadoraCambioModal';
 
 // Constantes para estados de factura.
 const ESTADOS_FACTURA = {
@@ -211,6 +212,11 @@ export default function FacturasPage() {
     const searchInputRef = useRef<HTMLInputElement>(null);
     const isProcessingRef = useRef(false); // Para evitar múltiples llamadas
 
+    // Divisas
+    const [divisas, setDivisas] = useState<{ clave: string; valor: string }[]>([]);
+    const [divisaSeleccionadaPago, setDivisaSeleccionadaPago] = useState<string>('RD');
+    const [showCalculadoraCambio, setShowCalculadoraCambio] = useState(false);
+
     // Formulario de pago
     const [pagoForm, setPagoForm] = useState<{
         monto: string;
@@ -251,6 +257,20 @@ export default function FacturasPage() {
     useEffect(() => {
         const img = new Image();
         img.src = '/Logo.jpeg';
+    }, []);
+
+    useEffect(() => {
+    const fetchDivisas = async () => {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch(API_ENDPOINTS.CONFIGURACIONES, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setDivisas(data.filter((c: any) => c.clave.startsWith('DIVISA_')));
+        }
+    };
+    fetchDivisas();
     }, []);
 
     // ==================== FUNCIONES DE FETCH ====================
@@ -556,17 +576,18 @@ export default function FacturasPage() {
     };
 
     const handlePagoConCambio = async () => {
-        if (!selectedFactura) return;
-
-        const monto = parseFloat(pagoForm.monto) || 0;
-        const entregado = parseFloat(dineroEntregado) || 0;
-
-        if (entregado < monto) {
-            toast.error('El monto entregado debe ser al menos el monto a abonar');
-            return;
-        }
-
-        await procesarPago(selectedFactura.idFactura, monto);
+    if (!selectedFactura) return;
+    const monto = parseFloat(pagoForm.monto) || 0;
+    const entregadoRaw = parseFloat(dineroEntregado) || 0;
+    const tasa = divisaSeleccionadaPago !== 'RD'
+        ? parseFloat(divisas.find(d => d.clave === divisaSeleccionadaPago)?.valor || '1')
+        : 1;
+    const entregadoEnRD = entregadoRaw * tasa;
+    if (entregadoEnRD < monto) {
+        toast.error('El monto entregado es insuficiente');
+        return;
+    }
+    await procesarPago(selectedFactura.idFactura, monto);
     };
 
     // ==================== CAMBIAR ESTADO ====================
@@ -653,16 +674,17 @@ export default function FacturasPage() {
     };
 
     const abrirPagoModal = (factura: FacturaResumen) => {
-        setSelectedFactura(factura);
-        const pendiente = factura.montoPendiente || 0;
-        setPagoForm({
-            monto: pendiente.toString(),
-            metodoPago: 'efectivo',
-            referencia: '',
-            notas: '',
-        });
-        setDineroEntregado('');
-        setShowPagoModal(true);
+    setSelectedFactura(factura);
+    const pendiente = factura.montoPendiente || 0;
+    setPagoForm({
+        monto: pendiente.toString(),
+        metodoPago: 'efectivo',
+        referencia: '',
+        notas: '',
+    });
+    setDineroEntregado('');
+    setDivisaSeleccionadaPago('RD');
+    setShowPagoModal(true);
     };
 
     const aplicarFiltroPendientes = () => {
@@ -704,10 +726,14 @@ export default function FacturasPage() {
 
     // Calcular cambio para pago existente
     const getChangeAmountPago = () => {
-        if (!selectedFactura) return 0;
-        const monto = parseFloat(pagoForm.monto) || 0;
-        const entregado = parseFloat(dineroEntregado) || 0;
-        return Math.max(0, entregado - monto);
+    if (!selectedFactura) return 0;
+    const monto = parseFloat(pagoForm.monto) || 0;
+    const entregadoRaw = parseFloat(dineroEntregado) || 0;
+    const tasa = divisaSeleccionadaPago !== 'RD'
+        ? parseFloat(divisas.find(d => d.clave === divisaSeleccionadaPago)?.valor || '1')
+        : 1;
+    const entregadoEnRD = entregadoRaw * tasa;
+    return Math.max(0, entregadoEnRD - monto);
     };
 
     // Función para abrir detalle de factura con indicador de carga
@@ -774,6 +800,12 @@ export default function FacturasPage() {
                     >
                         <Clock className="h-4 w-4" />
                         {filtros.soloPendientes ? 'Mostrar Todas' : 'Solo Pendientes'}
+                    </button>
+                    <button
+                        onClick={() => setShowCalculadoraCambio(true)}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all shadow-md flex items-center gap-2"
+                    >
+                        <DollarSign className="h-4 w-4" /> Calcular Cambio
                     </button>
                     <button
                         onClick={() => setShowModal(true)}
@@ -1420,7 +1452,6 @@ export default function FacturasPage() {
                         <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
                             Calcular Cambio - {selectedFactura.numeroFactura}
                         </h3>
-
                         <div className="space-y-4">
                             <div className="p-3 bg-gray-50 rounded-lg">
                                 <div className="text-sm space-y-1">
@@ -1437,9 +1468,39 @@ export default function FacturasPage() {
                                 </div>
                             </div>
 
+                            {/* Selector de divisa */}
+                            {divisas.length > 0 && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-700">
+                                        Moneda de pago del cliente
+                                    </label>
+                                    <select
+                                        value={divisaSeleccionadaPago}
+                                        onChange={(e) => {
+                                            setDivisaSeleccionadaPago(e.target.value);
+                                            setDineroEntregado('');
+                                        }}
+                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
+                                    >
+                                        <option value="RD">Pesos Dominicanos (RD$)</option>
+                                        {divisas.map(d => (
+                                            <option key={d.clave} value={d.clave}>
+                                                {d.clave.replace('DIVISA_', '')} (1 = RD$ {parseFloat(d.valor).toFixed(2)})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                                    Dinero Entregado por el Cliente *
+                                    Dinero Entregado por el Cliente
+                                    {divisaSeleccionadaPago !== 'RD' && (
+                                        <span className="ml-1 text-cyan-600 font-semibold">
+                                            (en {divisaSeleccionadaPago.replace('DIVISA_', '')})
+                                        </span>
+                                    )}
+                                    *
                                 </label>
                                 <input
                                     type="number"
@@ -1450,22 +1511,38 @@ export default function FacturasPage() {
                                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
                                     autoFocus
                                 />
+                                {divisaSeleccionadaPago !== 'RD' && dineroEntregado && (() => {
+                                    const tasa = parseFloat(divisas.find(d => d.clave === divisaSeleccionadaPago)?.valor || '1');
+                                    const enRD = parseFloat(dineroEntregado) * tasa;
+                                    return (
+                                        <p className="text-xs text-cyan-600 mt-1">
+                                            Equivale a {formatCurrency(enRD)} en RD$
+                                        </p>
+                                    );
+                                })()}
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1 text-gray-700">Cambio a Devolver:</label>
-                                <p className={`text-2xl font-bold ${
-                                    getChangeAmountPago() >= 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
+                                <label className="block text-sm font-medium mb-1 text-gray-700">
+                                    Cambio a Devolver (en RD$):
+                                </label>
+                                <p className={`text-2xl font-bold ${getChangeAmountPago() >= 0 && parseFloat(dineroEntregado) > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatCurrency(getChangeAmountPago())}
-                                    {getChangeAmountPago() < 0 ? ' (Insuficiente)' : ''}
+                                    {parseFloat(dineroEntregado) > 0 && getChangeAmountPago() === 0 &&
+                                        parseFloat(pagoForm.monto) > (() => {
+                                            const tasa = divisaSeleccionadaPago !== 'RD'
+                                                ? parseFloat(divisas.find(d => d.clave === divisaSeleccionadaPago)?.valor || '1')
+                                                : 1;
+                                            return (parseFloat(dineroEntregado) || 0) * tasa;
+                                        })()
+                                        ? ' (Insuficiente)' : ''}
                                 </p>
                             </div>
 
                             <div className="flex space-x-3 pt-2">
                                 <button
                                     onClick={handlePagoConCambio}
-                                    disabled={getChangeAmountPago() < 0}
+                                    disabled={getChangeAmountPago() < 0 || !dineroEntregado}
                                     className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md disabled:opacity-50"
                                 >
                                     Confirmar Pago
@@ -1481,6 +1558,13 @@ export default function FacturasPage() {
                     </div>
                 </div>
             )}
+            {showCalculadoraCambio && (
+                    <CalculadoraCambioModal
+                        divisas={divisas}
+                        onClose={() => setShowCalculadoraCambio(false)}
+                        formatCurrency={formatCurrency}
+                    />
+                )}
         </div>
     );
 }
