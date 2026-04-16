@@ -19,12 +19,20 @@ export default function DashboardLayout({
     const { user, isAuthenticated, isLoading, logout, idRol } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    
+    // ✅ CORRECCIÓN 1: Iniciar en false. En escritorio siempre se verá gracias a lg:translate-x-0
+    const [sidebarOpen, setSidebarOpen] = useState(false); 
+    
     const [config, setConfig] = useState<ConfiguracionesGenerales>({
         controlStockActivo: false,
         controlEntregasActivo: false,
     });
     const [configLoading, setConfigLoading] = useState(true);
+
+    // ✅ CORRECCIÓN 2: Cerrar el menú automáticamente al cambiar de ruta en móviles
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [pathname]);
 
     // Cargar configuración
     useEffect(() => {
@@ -60,7 +68,6 @@ export default function DashboardLayout({
     // Verificar acceso a la ruta actual
     useEffect(() => {
         if (!isLoading && !configLoading && isAuthenticated && pathname) {
-            // Si estamos en la página de entregas y el control está desactivado, redirigir
             if (pathname === '/dashboard/entregas' && !config.controlEntregasActivo) {
                 toast.error('El control de entregas está desactivado');
                 router.push('/dashboard');
@@ -91,10 +98,8 @@ export default function DashboardLayout({
         return null;
     }
 
-    // Obtener items de menú filtrados por rol
     let navigation = getMenuItemsForRole(idRol);
 
-    // Filtrar el menú de Entregas si el control está desactivado
     if (!config.controlEntregasActivo) {
         navigation = navigation.filter(item => item.href !== '/dashboard/entregas');
     }
@@ -121,7 +126,7 @@ export default function DashboardLayout({
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                    <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
                         {navigation.map((item) => {
                             const isActive = pathname === item.href;
                             return (
@@ -144,17 +149,17 @@ export default function DashboardLayout({
                     {/* User Info */}
                     <div className="border-t border-blue-500/30 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
                         <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-lg font-bold ring-2 ring-white/30">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-lg font-bold ring-2 ring-white/30 shadow-inner">
                                 {user?.nombre.charAt(0).toUpperCase()}
                             </div>
-                            <div className="ml-3 flex-1">
-                                <p className="text-sm font-medium">{user?.nombre} {user?.apellido}</p>
-                                <p className="text-xs text-blue-200">{user?.username}</p>
+                            <div className="ml-3 flex-1 overflow-hidden">
+                                <p className="text-sm font-medium truncate">{user?.nombre} {user?.apellido}</p>
+                                <p className="text-xs text-blue-200 truncate">{user?.username}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="mt-3 w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all shadow-md hover:shadow-lg"
+                            className="mt-3 w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition-all shadow-md hover:shadow-lg active:scale-95"
                         >
                             Cerrar Sesión
                         </button>
@@ -162,36 +167,23 @@ export default function DashboardLayout({
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <div className={`transition-all duration-300 ${sidebarOpen ? 'lg:pl-64' : ''}`}>
+            {/* ✅ CORRECCIÓN 3: Main Content siempre tiene padding en escritorio (lg:pl-64) sin depender del estado del móvil */}
+            <div className="transition-all duration-300 lg:pl-64">
                 {/* Top Bar */}
-                <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-cyan-100">
-                    <div className="flex items-center justify-between px-4 py-4">
+                <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-cyan-100">
+                    <div className="flex items-center justify-between px-4 py-4 lg:px-8">
                         <button
                             type="button"
-                            aria-label={sidebarOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
-                            aria-expanded={sidebarOpen}
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="p-2 rounded-lg hover:bg-cyan-50 lg:hidden transition-colors"
+                            className="p-2 rounded-lg hover:bg-cyan-50 lg:hidden transition-colors text-cyan-600"
                         >
-                            <svg
-                                aria-hidden="true"
-                                className="w-6 h-6 text-cyan-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 6h16M4 12h16M4 18h16"
-                                />
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
 
-                        <div className="flex-1 px-4">
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                        <div className="flex-1 px-4 lg:px-0">
+                            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent truncate">
                                 {navigation.find((item) => item.href === pathname)?.name || 'Dashboard'}
                             </h1>
                         </div>
@@ -199,13 +191,13 @@ export default function DashboardLayout({
                 </header>
 
                 {/* Page Content */}
-                <main className="p-6">{children}</main>
+                <main className="p-4 md:p-6 overflow-x-hidden">{children}</main>
             </div>
 
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
