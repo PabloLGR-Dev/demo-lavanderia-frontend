@@ -116,7 +116,7 @@ export default function DashboardLayout({
                     {/* Logo */}
                     <div className="flex items-center justify-center h-20 border-b border-blue-500/30 px-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20">
                         <Image
-                            src="/Logo.jpeg"
+                            src="/logo.jpeg"
                             alt="Logo"
                             width={50}
                             height={50}
