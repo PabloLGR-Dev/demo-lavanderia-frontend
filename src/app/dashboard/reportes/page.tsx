@@ -156,7 +156,7 @@ export default function ReportesPage() {
             const html2canvas = (await import('html2canvas')).default;
 
             // Convertir logo a base64
-            const logoBase64 = await fetch('/Logo.jpeg')
+            const logoBase64 = await fetch('/logo.jpeg')
                 .then(res => res.blob())
                 .then(blob => new Promise<string>((resolve) => {
                     const reader = new FileReader();

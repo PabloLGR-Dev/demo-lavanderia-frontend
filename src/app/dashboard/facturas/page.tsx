@@ -321,7 +321,7 @@ export default function FacturasPage() {
 
     useEffect(() => {
         const img = new Image();
-        img.src = '/Logo.jpeg';
+        img.src = 'logo.jpeg';
     }, []);
 
     useEffect(() => {

@@ -473,7 +473,7 @@ const PrintFactura: React.FC<PrintFacturaProps> = ({ factura, isOpen, onClose })
                         <div className="flex items-center gap-3">
                             <div className="relative w-10 h-10">
                                 <Image
-                                    src="/Logo.jpeg"
+                                    src="/logo.jpeg"
                                     alt="Logo"
                                     fill
                                     className="object-contain"
@@ -598,7 +598,7 @@ const PrintFactura: React.FC<PrintFacturaProps> = ({ factura, isOpen, onClose })
                     {/* Logo oculto para capturar en Data URL */}
                     <img
                         id="logo-print"
-                        src="/Logo.jpeg"
+                        src="/logo.jpeg"
                         alt="Logo Lavandería Rodríguez"
                         style={{ display: 'none' }}
                         onLoad={() => setLogoLoaded(true)}
