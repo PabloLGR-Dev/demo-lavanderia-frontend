@@ -229,6 +229,10 @@ export default function FacturasComponents({
         data?: any;
     } | null>(null);
 
+    // Divisas
+    const [divisas, setDivisas] = useState<{ clave: string; valor: string; descripcion: string }[]>([]);
+    const [divisaSeleccionada, setDivisaSeleccionada] = useState<string>('RD');
+
     // ==================== EFECTOS ====================
     // Efecto para resetear formularios cuando se abre el modal
     useEffect(() => {
@@ -236,6 +240,25 @@ export default function FacturasComponents({
             resetFacturaForm();
         }
     }, [showModal]);
+
+    // Cargar divisas al montar el componente
+    useEffect(() => {
+        const fetchDivisas = async () => {
+            try {
+                const token = localStorage.getItem('accessToken');
+                const res = await fetch(API_ENDPOINTS.CONFIGURACIONES, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setDivisas(data.filter((c: any) => c.clave.startsWith('DIVISA_')));
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchDivisas();
+    }, []);
 
     // Efecto para actualizar confirmationForm cuando cambia preparedFacturaDto
     useEffect(() => {
@@ -678,11 +701,11 @@ export default function FacturasComponents({
         }
     };
 
-    const handleCalculateChange = async () => {
+    const handleCalculateChange = async (entregadoEnRDOverride?: number) => {
         if (!preparedFacturaDto) return;
 
         const montoAbonado = parseFloat(confirmationFormLocal.montoAbonado) || 0;
-        const entregado = parseFloat(dineroEntregado) || 0;
+        const entregado = entregadoEnRDOverride ?? (parseFloat(dineroEntregado) || 0);
 
         if (entregado < montoAbonado) {
             toast.error('El monto entregado debe ser al menos el monto a abonar');
@@ -1477,8 +1500,41 @@ export default function FacturasComponents({
                                 <label className="block text-sm font-medium mb-1 text-gray-700">
                                     Monto a Abonar: {propFormatCurrency(parseFloat(confirmationFormLocal.montoAbonado) || 0)}
                                 </label>
+                            </div>
+
+                            {/* Selector de divisa */}
+                            {divisas.length > 0 && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-700">
+                                        Moneda de pago del cliente
+                                    </label>
+                                    <select
+                                        value={divisaSeleccionada}
+                                        onChange={(e) => {
+                                            setDivisaSeleccionada(e.target.value);
+                                            setDineroEntregado('');
+                                        }}
+                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
+                                    >
+                                        <option value="RD">Pesos Dominicanos (RD$)</option>
+                                        {divisas.map(d => (
+                                            <option key={d.clave} value={d.clave}>
+                                                {d.clave.replace('DIVISA_', '')} (1 = RD$ {parseFloat(d.valor).toFixed(2)})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            <div>
                                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                                    Dinero Entregado por el Cliente *
+                                    Dinero Entregado por el Cliente
+                                    {divisaSeleccionada !== 'RD' && (
+                                        <span className="ml-1 text-cyan-600 font-semibold">
+                                            (en {divisaSeleccionada.replace('DIVISA_', '')})
+                                        </span>
+                                    )}
+                                    *
                                 </label>
                                 <input
                                     type="number"
@@ -1489,21 +1545,58 @@ export default function FacturasComponents({
                                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
                                     autoFocus
                                 />
+                                {/* Mostrar equivalencia en RD$ si se usa otra divisa */}
+                                {divisaSeleccionada !== 'RD' && dineroEntregado && (() => {
+                                    const tasa = parseFloat(divisas.find(d => d.clave === divisaSeleccionada)?.valor || '1');
+                                    const enRD = parseFloat(dineroEntregado) * tasa;
+                                    return (
+                                        <p className="text-xs text-cyan-600 mt-1">
+                                            Equivale a {propFormatCurrency(enRD)} en RD$
+                                        </p>
+                                    );
+                                })()}
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium mb-1 text-gray-700">Cambio a Devolver:</label>
-                                <p className={`text-2xl font-bold ${
-                                    getChangeAmount() >= 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                    {propFormatCurrency(getChangeAmount())}
-                                    {getChangeAmount() < 0 ? ' (Insuficiente)' : ''}
-                                </p>
+                                <label className="block text-sm font-medium mb-1 text-gray-700">
+                                    Cambio a Devolver (en RD$):
+                                </label>
+                                {(() => {
+                                    const montoAbonado = parseFloat(confirmationFormLocal.montoAbonado) || 0;
+                                    const entregadoRaw = parseFloat(dineroEntregado) || 0;
+                                    const tasa = divisaSeleccionada !== 'RD'
+                                        ? parseFloat(divisas.find(d => d.clave === divisaSeleccionada)?.valor || '1')
+                                        : 1;
+                                    const entregadoEnRD = entregadoRaw * tasa;
+                                    const cambio = Math.max(0, entregadoEnRD - montoAbonado);
+                                    const insuficiente = entregadoEnRD < montoAbonado;
+                                    return (
+                                        <p className={`text-2xl font-bold ${insuficiente ? 'text-red-600' : 'text-green-600'}`}>
+                                            {propFormatCurrency(cambio)}
+                                            {insuficiente ? ' (Insuficiente)' : ''}
+                                        </p>
+                                    );
+                                })()}
                             </div>
+
                             <div className="flex space-x-3 pt-2">
                                 <button
-                                    onClick={handleCalculateChange}
-                                    disabled={getChangeAmount() < 0}
-                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md disabled:opacity-50"
+                                    onClick={() => {
+                                        const montoAbonado = parseFloat(confirmationFormLocal.montoAbonado) || 0;
+                                        const entregadoRaw = parseFloat(dineroEntregado) || 0;
+                                        const tasa = divisaSeleccionada !== 'RD'
+                                            ? parseFloat(divisas.find(d => d.clave === divisaSeleccionada)?.valor || '1')
+                                            : 1;
+                                        const entregadoEnRD = entregadoRaw * tasa;
+
+                                        if (entregadoEnRD < montoAbonado) {
+                                            toast.error('El monto entregado es insuficiente');
+                                            return;
+                                        }
+
+                                        handleCalculateChange(entregadoEnRD);
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md"
                                 >
                                     Crear Factura
                                 </button>
