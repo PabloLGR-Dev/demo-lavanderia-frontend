@@ -120,7 +120,7 @@ export default function ForgotPasswordPage() {
                         <div className="mb-8 md:mb-10">
                             <div className="w-40 h-40 md:w-48 md:h-48 mx-auto rounded-full border-4 border-white/30 flex items-center justify-center backdrop-blur-sm bg-white/10 shadow-lg">
                                 <Image
-                                    src="/Logo.jpeg"
+                                    src="/logo.jpeg"
                                     alt="Lavandería Rodríguez #2"
                                     width={140}
                                     height={140}
