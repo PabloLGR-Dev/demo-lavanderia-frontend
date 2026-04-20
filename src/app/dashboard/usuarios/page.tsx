@@ -294,13 +294,13 @@ export default function UsuariosPage() {
     return (
         <ProtectedRoute requiredRole={ROLES.ADMIN}>
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
                     Gestión de Usuarios
                 </h2>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md"
+                    className="w-full sm:w-auto flex justify-center items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md"
                 >
                     <UserPlus className="inline h-4 w-4 mr-1" /> Nuevo Usuario
                 </button>
@@ -317,8 +317,9 @@ export default function UsuariosPage() {
             </div>
 
             <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-cyan-100">
-                <table className="min-w-full">
-                    <thead className="bg-gradient-to-r from-cyan-50 to-blue-50">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full">
+                        <thead className="bg-gradient-to-r from-cyan-50 to-blue-50">
                     <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Nombre</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-cyan-700 uppercase">Username</th>
@@ -379,6 +380,7 @@ export default function UsuariosPage() {
                     ))}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {/* Modal Nuevo Usuario */}

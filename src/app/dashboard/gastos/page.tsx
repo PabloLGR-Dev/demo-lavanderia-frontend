@@ -610,8 +610,8 @@ export default function GastosPage() {
     return (
         <div className="space-y-6">
             {/* HEADER */}
-            <div className="flex justify-between items-center">
-                <div>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="w-full">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
                         {vistaActual === 'gastos' ? 'Gestión de Gastos' : 'Gestión de Categorías'}
                     </h2>
@@ -622,10 +622,10 @@ export default function GastosPage() {
                         }
                     </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto mt-2 md:mt-0">
                     <button
                         onClick={() => cambiarVista(vistaActual === 'gastos' ? 'categorias' : 'gastos')}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all shadow-md flex items-center gap-2"
+                        className="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all shadow-md flex items-center justify-center gap-2"
                     >
                         {vistaActual === 'gastos' ? (
                             <>
@@ -647,7 +647,7 @@ export default function GastosPage() {
                                 setShowModalCategoria(true);
                             }
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md flex items-center gap-2"
+                        className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md flex items-center justify-center gap-2"
                     >
                         <Plus className="h-4 w-4" />
                         {vistaActual === 'gastos' ? 'Nuevo Gasto' : 'Nueva Categoría'}
@@ -835,10 +835,11 @@ export default function GastosPage() {
                                         <td className="px-6 py-4 text-sm text-gray-900">
                                             {format(parseISO(gasto.fechaGasto), 'dd/MM/yyyy', { locale: es })}
                                         </td>
-                                        <td className="px-6 py-4 text-sm">
+                                        <td className="px-6 py-4 text-sm whitespace-nowrap">
                                             <span
-                                                className="px-2 py-1 rounded-full text-white text-xs font-medium"
+                                                className="inline-block px-3 py-1 rounded-full text-white text-xs font-medium truncate max-w-[120px] sm:max-w-none text-center"
                                                 style={{ backgroundColor: gasto.categoriaColor }}
+                                                title={gasto.categoria}
                                             >
                                                 {gasto.categoria}
                                             </span>
@@ -981,13 +982,13 @@ export default function GastosPage() {
                                         <td className="px-6 py-4 text-sm font-semibold text-red-600">
                                             {formatCurrency(categoria.montoTotalGastos)}
                                         </td>
-                                        <td className="px-6 py-4 text-sm">
+                                        <td className="px-6 py-4 text-sm whitespace-nowrap">
                                             <button
                                                 onClick={() => handleToggleEstadoCategoria(categoria.idCategoriaGasto)}
-                                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                                className={`inline-block px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                                                     categoria.idEstado === 1
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
+                                                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                        : 'bg-red-100 text-red-800 hover:bg-red-200'
                                                 }`}
                                             >
                                                 {categoria.estado}

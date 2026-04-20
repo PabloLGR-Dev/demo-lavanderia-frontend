@@ -818,10 +818,10 @@ export default function FacturasComponents({
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
-                        <form onSubmit={handlePrepareConfirmation} className="flex-1 overflow-hidden">
-                            <div className="grid grid-cols-2 gap-6 h-full">
+                        <form onSubmit={handlePrepareConfirmation} className="flex-1 overflow-hidden flex flex-col">
+                            <div className="flex flex-col lg:flex-row h-full overflow-y-auto lg:overflow-hidden">
                                 {/* COLUMNA IZQUIERDA - FORMULARIO */}
-                                <div className="p-6 overflow-y-auto border-r" style={{ maxHeight: 'calc(95vh - 80px)' }}>
+                                <div className="w-full lg:w-1/2 p-4 lg:p-6 lg:overflow-y-auto border-b-2 lg:border-b-0 lg:border-r border-gray-200">
                                     <div className="space-y-6 text-sm">
                                         {/* Información del Cliente */}
                                         <div>
@@ -1107,10 +1107,8 @@ export default function FacturasComponents({
                                     </div>
                                 </div>
                                 {/* COLUMNA DERECHA - CARRITO */}
-                                <div className="bg-white overflow-y-auto relative"
-                                     style={{maxHeight: 'calc(95vh - 80px)'}}>
-                                    <div
-                                        className="sticky top-0 bg-white z-[9999] pb-4 mb-4 border-b shadow-sm px-6 pt-6">
+                                <div className="w-full lg:w-1/2 bg-white lg:overflow-y-auto relative">
+                                    <div className="sticky top-0 bg-white z-[40] pb-4 mb-4 border-b shadow-sm px-4 lg:px-6 pt-4 lg:pt-6">
                                         <h4 className="font-bold text-md text-gray-800 flex items-center gap-2">
                                             🛒 Items Facturados
                                         </h4>
@@ -1259,7 +1257,7 @@ export default function FacturasComponents({
                             Resumen de Factura
                         </h3>
                         <div className="space-y-5">
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <span className="text-gray-600">Cliente:</span>
                                     <p className="font-medium text-gray-900">{preparedFacturaDto.nombreCliente}</p>
@@ -1309,8 +1307,8 @@ export default function FacturasComponents({
                                 <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     💰 Descuento
                                 </h4>
-                                <div className="grid grid-cols-3 gap-3 mb-3">
-                                    <div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                    <div className="sm:col-span-1">
                                         <select
                                             value={confirmationFormLocal.descuentoTipo}
                                             onChange={(e) => setConfirmationFormLocal({
@@ -1326,7 +1324,7 @@ export default function FacturasComponents({
                                         </select>
                                     </div>
                                     {confirmationFormLocal.descuentoTipo === 'porcentaje' ? (
-                                        <div className="col-span-2">
+                                        <div className="sm:col-span-2">
                                             <input
                                                 type="number"
                                                 step="0.1"
@@ -1342,7 +1340,7 @@ export default function FacturasComponents({
                                             />
                                         </div>
                                     ) : (
-                                        <div className="col-span-2">
+                                        <div className="sm:col-span-2">
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -1470,7 +1468,7 @@ export default function FacturasComponents({
                                 )}
                             </div>
                         </div>
-                        <div className="flex space-x-3 mt-6">
+                        <div className="flex flex-col sm:flex-row gap-3 mt-6">
                             <button
                                 onClick={handleConfirmCreation}
                                 className="flex-1 px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md font-medium"
@@ -1649,8 +1647,8 @@ export default function FacturasComponents({
                         ) : (
                             <div className="space-y-6">
                                 {/* Información General */}
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div className="col-span-2 md:col-span-1">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div className="col-span-1">
                                         <div className="bg-gray-50 p-4 rounded-lg">
                                             <h4 className="font-semibold text-gray-700 mb-2">Cliente</h4>
                                             <p className="font-medium text-gray-900">{facturaDetalles.nombreCliente}</p>
@@ -1664,7 +1662,7 @@ export default function FacturasComponents({
                                             )}
                                         </div>
                                     </div>
-                                    <div className="col-span-2 md:col-span-1">
+                                    <div className="col-span-1">
                                         <div className="bg-gray-50 p-4 rounded-lg">
                                             <h4 className="font-semibold text-gray-700 mb-2">Información de Entrega</h4>
                                             <div className="space-y-1">
@@ -1691,7 +1689,7 @@ export default function FacturasComponents({
                                 {/* Detalles de Items */}
                                 <div>
                                     <h4 className="font-semibold text-gray-700 mb-3">Detalles de la Factura</h4>
-                                    <div className="border rounded-lg overflow-hidden">
+                                    <div className="border rounded-lg overflow-x-auto">
                                         <table className="min-w-full divide-y divide-gray-200">
                                             <thead className="bg-gray-50">
                                             <tr>
@@ -1735,7 +1733,7 @@ export default function FacturasComponents({
                                     </div>
                                 </div>
                                 {/* Totales */}
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <h4 className="font-semibold text-gray-700 mb-3">Resumen de Pagos</h4>
                                         <div className="space-y-2">

@@ -17,7 +17,7 @@ interface PrintFacturaProps {
 
 const PrintFactura: React.FC<PrintFacturaProps> = ({ factura, isOpen, onClose }) => {
     const printRef = useRef<HTMLDivElement>(null);
-    const [copias, setCopias] = useState<number>(1);
+    const [copias, setCopias] = useState<number>(2);
     const [isPrinting, setIsPrinting] = useState(false);
     const [copied, setCopied] = useState(false);
     const [logoLoaded, setLogoLoaded] = useState(false);

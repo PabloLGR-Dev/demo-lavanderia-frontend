@@ -827,22 +827,22 @@ export default function EntregasPage() {
                             </button>
                         </div>
 
-                        {/* ✅ SKELETON LOADER MIENTRAS CARGA */}
+                        {/* SKELETON LOADER MIENTRAS CARGA */}
                         {!facturaDetalle ? (
                             <div className="space-y-6 animate-pulse">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="bg-gray-100 p-4 rounded-lg h-20" />
                                     <div className="bg-gray-100 p-4 rounded-lg h-20" />
                                 </div>
                                 <div className="bg-gray-100 p-4 rounded-lg h-64" />
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="bg-gray-100 p-4 rounded-lg h-48" />
                                     <div className="bg-gray-100 p-4 rounded-lg h-48" />
                                 </div>
                             </div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                     <div className="bg-gray-50 p-4 rounded-lg">
                                         <p className="text-sm text-gray-600 mb-1">Cliente</p>
                                         <p className="font-semibold text-gray-900">{facturaDetalle.nombreCliente}</p>
@@ -860,7 +860,7 @@ export default function EntregasPage() {
 
                                 <div className="mb-6">
                                     <h4 className="font-semibold text-gray-900 mb-3">Items de la Factura</h4>
-                                    <div className="border rounded-lg overflow-hidden">
+                                    <div className="border rounded-lg overflow-x-auto">
                                         <table className="min-w-full">
                                             <thead className="bg-gray-50">
                                             <tr>
@@ -899,7 +899,7 @@ export default function EntregasPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="bg-cyan-50 p-4 rounded-lg border border-cyan-200">
                                         <h4 className="font-semibold text-gray-900 mb-3">Resumen Financiero</h4>
                                         <div className="space-y-2 text-sm">
@@ -973,7 +973,7 @@ export default function EntregasPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-3 mt-6 pt-6 border-t">
+                                <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t">
                                     {(facturaDetalle.montoPendiente || 0) > 0 && (
                                         <button
                                             onClick={() => {
