@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { API_ENDPOINTS } from '@/lib/api';
-import { PrendaListDto, ServicioSimpleDto } from '@/types';
+import { PrendaListDto, ServicioSimpleDto, PrendaServicioSimpleDto } from '@/types';
 import { toast } from 'sonner';
 import { Pencil, Trash2, Plus, DollarSign, Package } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -18,6 +18,7 @@ export default function PrendasPage() {
     const [showServicioModal, setShowServicioModal] = useState(false);
     const [editingPrenda, setEditingPrenda] = useState<PrendaListDto | null>(null);
     const [selectedPrenda, setSelectedPrenda] = useState<PrendaListDto | null>(null);
+    const [editingPrendaServicio, setEditingPrendaServicio] = useState<PrendaServicioSimpleDto | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [prendaFormData, setPrendaFormData] = useState({
         nombre: '',
@@ -164,40 +165,61 @@ export default function PrendasPage() {
 
     const handleAddServicio = (prenda: PrendaListDto) => {
         setSelectedPrenda(prenda);
+        setEditingPrendaServicio(null);
         setServicioFormData({ idServicio: '', precioUnitario: '' });
+        setShowServicioModal(true);
+    };
+
+    const handleEditPrendaServicio = (prenda: PrendaListDto, servicio: PrendaServicioSimpleDto) => {
+        setSelectedPrenda(prenda);
+        setEditingPrendaServicio(servicio);
+        setServicioFormData({ 
+            idServicio: servicio.idServicio.toString(), 
+            precioUnitario: servicio.precioUnitario.toString() 
+        });
         setShowServicioModal(true);
     };
 
     const handleSubmitServicio = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!servicioFormData.idServicio || !servicioFormData.precioUnitario) {
+        if (!servicioFormData.precioUnitario || (!editingPrendaServicio && !servicioFormData.idServicio)) {
             toast.error('Todos los campos son requeridos');
             return;
         }
 
         const token = localStorage.getItem('accessToken');
+        const isEditing = !!editingPrendaServicio;
+        
+        const url = isEditing 
+            ? API_ENDPOINTS.PRENDA_SERVICIO_BY_ID(editingPrendaServicio.idPrendaServicio)
+            : API_ENDPOINTS.PRENDAS_SERVICIOS;
+
         try {
-            const response = await fetch(API_ENDPOINTS.PRENDAS_SERVICIOS, {
-                method: 'POST',
+            const response = await fetch(url, {
+                method: isEditing ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    idPrenda: selectedPrenda?.idPrenda,
-                    idServicio: parseInt(servicioFormData.idServicio),
-                    precioUnitario: parseFloat(servicioFormData.precioUnitario),
-                }),
+                body: JSON.stringify(
+                    isEditing 
+                        ? { precioUnitario: parseFloat(servicioFormData.precioUnitario) }
+                        : {
+                              idPrenda: selectedPrenda?.idPrenda,
+                              idServicio: parseInt(servicioFormData.idServicio),
+                              precioUnitario: parseFloat(servicioFormData.precioUnitario),
+                          }
+                ),
             });
 
             if (response.ok) {
-                toast.success('Servicio agregado a la prenda');
+                toast.success(isEditing ? 'Precio actualizado exitosamente' : 'Servicio agregado a la prenda');
                 refreshData();
                 handleCloseServicioModal();
             } else {
                 const error = await response.json();
-                toast.error(error.message || 'Error al agregar servicio');
+                toast.error(error.message || 'Error al guardar el servicio');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -237,6 +259,7 @@ export default function PrendasPage() {
     const handleCloseServicioModal = () => {
         setShowServicioModal(false);
         setSelectedPrenda(null);
+        setEditingPrendaServicio(null);
         setServicioFormData({ idServicio: '', precioUnitario: '' });
     };
 
@@ -349,13 +372,22 @@ export default function PrendasPage() {
                                                         ${ps.precioUnitario.toFixed(2)}
                                                     </p>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDeletePrendaServicio(ps.idPrendaServicio)}
-                                                    className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                                                    title="Eliminar servicio"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
+                                                <div className="flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => handleEditPrendaServicio(prenda, ps)}
+                                                        className="p-1.5 text-cyan-600 hover:bg-cyan-100 rounded-lg transition-colors"
+                                                        title="Editar precio"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeletePrendaServicio(ps.idPrendaServicio)}
+                                                        className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                                                        title="Eliminar servicio"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -431,30 +463,38 @@ export default function PrendasPage() {
                     </div>
                 )}
 
-                {/* Modal Agregar Servicio */}
+                {/* Modal Agregar / Editar Servicio */}
                 {showServicioModal && (
                     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl border border-cyan-100">
                             <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                                Agregar Servicio a {selectedPrenda?.nombre}
+                                {editingPrendaServicio 
+                                    ? `Editar precio: ${editingPrendaServicio.nombreServicio}`
+                                    : `Agregar Servicio a ${selectedPrenda?.nombre}`
+                                }
                             </h3>
                             <form onSubmit={handleSubmitServicio} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1 text-gray-700">Servicio *</label>
-                                    <select
-                                        required
-                                        value={servicioFormData.idServicio}
-                                        onChange={(e) => setServicioFormData({ ...servicioFormData, idServicio: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
-                                    >
-                                        <option value="">Seleccionar servicio...</option>
-                                        {servicios.map((servicio) => (
-                                            <option key={servicio.idServicio} value={servicio.idServicio}>
-                                                {servicio.nombre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                
+                                {/* Solo mostramos el selector si NO estamos editando */}
+                                {!editingPrendaServicio && (
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1 text-gray-700">Servicio *</label>
+                                        <select
+                                            required
+                                            value={servicioFormData.idServicio}
+                                            onChange={(e) => setServicioFormData({ ...servicioFormData, idServicio: e.target.value })}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900"
+                                        >
+                                            <option value="">Seleccionar servicio...</option>
+                                            {servicios.map((servicio) => (
+                                                <option key={servicio.idServicio} value={servicio.idServicio}>
+                                                    {servicio.nombre}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-gray-700">Precio Unitario *</label>
                                     <div className="relative">
@@ -475,7 +515,7 @@ export default function PrendasPage() {
                                         type="submit"
                                         className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md"
                                     >
-                                        Agregar
+                                        {editingPrendaServicio ? 'Actualizar Precio' : 'Agregar'}
                                     </button>
                                     <button
                                         type="button"
