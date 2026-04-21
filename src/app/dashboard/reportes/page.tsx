@@ -15,7 +15,8 @@ import {
     RefreshCw,
     Filter,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    Share2 // <-- Importamos el icono para compartir
 } from 'lucide-react';
 import { format, parseISO, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, startOfDay, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -134,6 +135,190 @@ export default function ReportesPage() {
         fetchReporte(desde, hasta);
     };
 
+    // NUEVO: Extraemos la lógica de generación a una función reutilizable
+    const generarDocumentoPDF = async () => {
+        if (!reporteCompleto) throw new Error("No hay datos");
+
+        const jsPDF = (await import('jspdf')).default;
+        const html2canvas = (await import('html2canvas')).default;
+
+        const logoBase64 = await fetch('/logo.jpeg')
+            .then(res => res.blob())
+            .then(blob => new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(blob);
+            }));
+
+        const { resumenFinanciero, estadisticasGastos, estadisticasFacturas, recomendaciones } = reporteCompleto;
+
+        const contenidoHTML = `
+            <div style="background: white; padding: 40px; font-family: Arial, sans-serif; color: #333; width: 794px; box-sizing: border-box;">
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #0891b2; padding-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px;">
+                        <img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #0891b2;">
+                        <h2 style="color: #0891b2; font-size: 32px; font-weight: bold; margin: 0;">Lavandería Rodríguez</h2>
+                    </div>
+                    <h1 style="color: #0891b2; font-size: 28px; margin: 10px 0;">💰 Reporte Financiero</h1>
+                    <p style="color: #666; font-size: 14px;">Cuadre de Caja y Análisis del Negocio</p>
+                </div>
+
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                    <strong>Período:</strong> ${format(parseISO(resumenFinanciero.fechaDesde), 'dd MMM yyyy', { locale: es })} - ${format(parseISO(resumenFinanciero.fechaHasta), 'dd MMM yyyy', { locale: es })}
+                </div>
+
+                <div style="background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px;">
+                    <h2 style="font-size: 22px; margin-bottom: 20px; margin-top: 0;">💰 Cuadre de Caja</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">INGRESOS</div>
+                            <div style="font-size: 24px; font-weight: bold;">${formatCurrency(resumenFinanciero.totalIngresos)}</div>
+                            <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Facturas pagadas</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">GASTOS</div>
+                            <div style="font-size: 24px; font-weight: bold;">${formatCurrency(resumenFinanciero.totalGastos)}</div>
+                            <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Gastos operativos</div>
+                        </div>
+                        <div style="background: ${resumenFinanciero.gananciaNeta >= 0 ? '#10b981' : '#f97316'}; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">GANANCIA NETA</div>
+                            <div style="font-size: 24px; font-weight: bold;">${formatCurrency(resumenFinanciero.gananciaNeta)}</div>
+                            <div style="font-size: 11px; margin-top: 5px;">Margen: ${resumenFinanciero.margenGanancia.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold;">
+                        Estado: ${resumenFinanciero.gananciaNeta >= 0 ? '✅ RENTABLE' : '⚠️ PÉRDIDAS'}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px;">
+                    <div style="background: white; border: 2px solid #10b981; border-radius: 12px; padding: 20px;">
+                        <h3 style="color: #1f2937; font-size: 18px; margin-bottom: 15px; margin-top: 0; border-left: 4px solid #0891b2; padding-left: 10px;">Análisis de Ingresos</h3>
+                        <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span style="color: #4b5563; font-size: 14px;">Total de Facturas:</span>
+                            <span style="font-weight: bold; color: #111827;">${estadisticasFacturas.totalFacturas}</span>
+                        </div>
+                        <div style="background: #d1fae5; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span style="color: #4b5563; font-size: 14px;">Facturas Pagadas:</span>
+                            <span style="font-weight: bold; color: #059669;">${estadisticasFacturas.facturasPagadas}</span>
+                        </div>
+                        <div style="background: #fed7aa; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span style="color: #4b5563; font-size: 14px;">Facturas Pendientes:</span>
+                            <span style="font-weight: bold; color: #ea580c;">${estadisticasFacturas.facturasPendientes}</span>
+                        </div>
+                        <div style="background: #cffafe; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 2px solid #06b6d4;">
+                            <span style="color: #4b5563; font-size: 14px;">Total Cobrado:</span>
+                            <span style="font-weight: bold; color: #0891b2;">${formatCurrency(estadisticasFacturas.totalAbonado)}</span>
+                        </div>
+                        <div style="background: #fecaca; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between;">
+                            <span style="color: #4b5563; font-size: 14px;">Pendiente de Cobro:</span>
+                            <span style="font-weight: bold; color: #dc2626;">${formatCurrency(estadisticasFacturas.totalPendiente)}</span>
+                        </div>
+                    </div>
+
+                    <div style="background: white; border: 2px solid #ef4444; border-radius: 12px; padding: 20px;">
+                        <h3 style="color: #1f2937; font-size: 18px; margin-bottom: 15px; margin-top: 0; border-left: 4px solid #0891b2; padding-left: 10px;">Análisis de Gastos</h3>
+                        <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span style="color: #4b5563; font-size: 14px;">Total de Gastos:</span>
+                            <span style="font-weight: bold; color: #111827;">${estadisticasGastos.totalRegistros}</span>
+                        </div>
+                        <div style="background: #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 2px solid #ef4444;">
+                            <span style="color: #4b5563; font-size: 14px;">Total Gastado:</span>
+                            <span style="font-weight: bold; color: #dc2626;">${formatCurrency(estadisticasGastos.totalGastos)}</span>
+                        </div>
+                        <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between;">
+                            <span style="color: #4b5563; font-size: 14px;">Promedio por Gasto:</span>
+                            <span style="font-weight: bold; color: #111827;">${formatCurrency(estadisticasGastos.promedioGasto)}</span>
+                        </div>
+                        <div style="font-weight: 600; color: #374151; margin-bottom: 10px; font-size: 13px;">Gastos por Categoría:</div>
+                        ${estadisticasGastos.gastosPorCategoria.slice(0, 5).map(cat => `
+                            <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${cat.color};"></div>
+                                    <span style="font-size: 12px; color: #4b5563;">${cat.categoria}</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; font-size: 13px; color: #111827;">${formatCurrency(cat.total)}</div>
+                                    <div style="font-size: 10px; color: #6b7280;">${cat.porcentaje.toFixed(1)}%</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                    <h3 style="color: #92400e; font-size: 16px; margin-bottom: 15px; margin-top: 0;">💡 Análisis y Recomendaciones</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        ${recomendaciones.map(rec => `
+                            <li style="color: #78350f; font-size: 13px; margin-bottom: 8px; padding-left: 20px; position: relative;">
+                                <span style="position: absolute; left: 0;">•</span> ${rec.mensaje}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 12px;">
+                    <p style="margin: 0;">Reporte generado el ${format(new Date(), "dd 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}</p>
+                    <p style="margin-top: 5px; font-weight: bold; color: #0891b2;">Lavandería Rodríguez</p>
+                </div>
+            </div>
+        `;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = contenidoHTML;
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.top = '0';
+        tempDiv.style.width = '794px';
+        document.body.appendChild(tempDiv);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const canvas = await html2canvas(tempDiv, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+            width: 794,
+            height: tempDiv.offsetHeight,
+            windowWidth: 794,
+        });
+
+        document.body.removeChild(tempDiv);
+
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
+
+        const pageWidthMM = 210;
+        const pageHeightMM = 297;
+        const margin = 10;
+        const contentWidth = pageWidthMM - margin * 2;
+        const contentHeightMM = pageHeightMM - margin * 2;
+        const imgHeightMM = (canvas.height * contentWidth) / canvas.width;
+        const totalPages = Math.ceil(imgHeightMM / contentHeightMM);
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+        for (let page = 0; page < totalPages; page++) {
+            if (page > 0) pdf.addPage();
+            const sourceY = page * contentHeightMM;
+            pdf.addImage(imgData, 'JPEG', margin, margin - sourceY, contentWidth, imgHeightMM);
+
+            // Máscaras blancas para recortar lo que se sale de la página
+            pdf.setFillColor(255, 255, 255);
+            pdf.rect(0, 0, pageWidthMM, margin, 'F');                          // arriba
+            pdf.rect(0, pageHeightMM - margin, pageWidthMM, margin, 'F');      // abajo
+            pdf.rect(0, 0, margin, pageHeightMM, 'F');                          // izquierda
+            pdf.rect(pageWidthMM - margin, 0, margin, pageHeightMM, 'F');      // derecha
+        }
+
+        const nombreArchivo = `Reporte_Financiero_${format(new Date(), 'yyyy-MM-dd_HHmm')}.pdf`;
+        return { pdf, nombreArchivo };
+    };
+
     const exportarReportePDF = async () => {
         if (!reporteCompleto) {
             toast.error('No hay datos para exportar');
@@ -141,208 +326,63 @@ export default function ReportesPage() {
         }
 
         const confirmarDescarga = window.confirm(
-            '¿Deseas descargar el reporte como PDF?\n\n' +
-            'El archivo se descargará automáticamente en tu computadora.'
+            '¿Deseas descargar el reporte como PDF?\n\nEl archivo se descargará automáticamente en tu computadora.'
         );
-
-        if (!confirmarDescarga) {
-            return;
-        }
+        if (!confirmarDescarga) return;
 
         const toastId = toast.loading('Generando PDF...');
 
         try {
-            const jsPDF = (await import('jspdf')).default;
-            const html2canvas = (await import('html2canvas')).default;
-
-            // Convertir logo a base64
-            const logoBase64 = await fetch('/logo.jpeg')
-                .then(res => res.blob())
-                .then(blob => new Promise<string>((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result as string);
-                    reader.readAsDataURL(blob);
-                }));
-
-            const { resumenFinanciero, estadisticasGastos, estadisticasFacturas, recomendaciones } = reporteCompleto;
-
-            // Crear contenido HTML
-            const contenidoHTML = `
-                <div style="background: white; padding: 40px; font-family: Arial, sans-serif; color: #333; width: 210mm;">
-                    <!-- Header -->
-                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #0891b2; padding-bottom: 20px;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px;">
-                            <img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #0891b2;">
-                            <h2 style="color: #0891b2; font-size: 32px; font-weight: bold; margin: 0;">Lavandería Rodríguez</h2>
-                        </div>
-                        <h1 style="color: #0891b2; font-size: 28px; margin: 10px 0;">💰 Reporte Financiero</h1>
-                        <p style="color: #666; font-size: 14px;">Cuadre de Caja y Análisis del Negocio</p>
-                    </div>
-
-                    <!-- Período -->
-                    <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
-                        <strong>Período:</strong> ${format(parseISO(resumenFinanciero.fechaDesde), 'dd MMM yyyy', { locale: es })} - ${format(parseISO(resumenFinanciero.fechaHasta), 'dd MMM yyyy', { locale: es })}
-                    </div>
-
-                    <!-- Cuadre de Caja -->
-                    <div style="background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px;">
-                        <h2 style="font-size: 22px; margin-bottom: 20px;">💰 Cuadre de Caja</h2>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
-                            <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px;">
-                                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">INGRESOS</div>
-                                <div style="font-size: 24px; font-weight: bold;">${formatCurrency(resumenFinanciero.totalIngresos)}</div>
-                                <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Facturas pagadas</div>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px;">
-                                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">GASTOS</div>
-                                <div style="font-size: 24px; font-weight: bold;">${formatCurrency(resumenFinanciero.totalGastos)}</div>
-                                <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Gastos operativos</div>
-                            </div>
-                            <div style="background: ${resumenFinanciero.gananciaNeta >= 0 ? '#10b981' : '#f97316'}; padding: 20px; border-radius: 8px;">
-                                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">GANANCIA NETA</div>
-                                <div style="font-size: 24px; font-weight: bold;">${formatCurrency(resumenFinanciero.gananciaNeta)}</div>
-                                <div style="font-size: 11px; margin-top: 5px;">Margen: ${resumenFinanciero.margenGanancia.toFixed(1)}%</div>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold;">
-                            Estado: ${resumenFinanciero.gananciaNeta >= 0 ? '✅ RENTABLE' : '⚠️ PÉRDIDAS'}
-                        </div>
-                    </div>
-
-                    <!-- Análisis de Ingresos y Gastos -->
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px;">
-                        <!-- Ingresos -->
-                        <div style="background: white; border: 2px solid #10b981; border-radius: 12px; padding: 20px;">
-                            <h3 style="color: #1f2937; font-size: 18px; margin-bottom: 15px; border-left: 4px solid #0891b2; padding-left: 10px;">Análisis de Ingresos</h3>
-                            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                                <span style="color: #4b5563; font-size: 14px;">Total de Facturas:</span>
-                                <span style="font-weight: bold; color: #111827;">${estadisticasFacturas.totalFacturas}</span>
-                            </div>
-                            <div style="background: #d1fae5; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                                <span style="color: #4b5563; font-size: 14px;">Facturas Pagadas:</span>
-                                <span style="font-weight: bold; color: #059669;">${estadisticasFacturas.facturasPagadas}</span>
-                            </div>
-                            <div style="background: #fed7aa; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                                <span style="color: #4b5563; font-size: 14px;">Facturas Pendientes:</span>
-                                <span style="font-weight: bold; color: #ea580c;">${estadisticasFacturas.facturasPendientes}</span>
-                            </div>
-                            <div style="background: #cffafe; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 2px solid #06b6d4;">
-                                <span style="color: #4b5563; font-size: 14px;">Total Cobrado:</span>
-                                <span style="font-weight: bold; color: #0891b2;">${formatCurrency(estadisticasFacturas.totalAbonado)}</span>
-                            </div>
-                            <div style="background: #fecaca; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between;">
-                                <span style="color: #4b5563; font-size: 14px;">Pendiente de Cobro:</span>
-                                <span style="font-weight: bold; color: #dc2626;">${formatCurrency(estadisticasFacturas.totalPendiente)}</span>
-                            </div>
-                        </div>
-
-                        <!-- Gastos -->
-                        <div style="background: white; border: 2px solid #ef4444; border-radius: 12px; padding: 20px;">
-                            <h3 style="color: #1f2937; font-size: 18px; margin-bottom: 15px; border-left: 4px solid #0891b2; padding-left: 10px;">Análisis de Gastos</h3>
-                            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                                <span style="color: #4b5563; font-size: 14px;">Total de Gastos:</span>
-                                <span style="font-weight: bold; color: #111827;">${estadisticasGastos.totalRegistros}</span>
-                            </div>
-                            <div style="background: #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 2px solid #ef4444;">
-                                <span style="color: #4b5563; font-size: 14px;">Total Gastado:</span>
-                                <span style="font-weight: bold; color: #dc2626;">${formatCurrency(estadisticasGastos.totalGastos)}</span>
-                            </div>
-                            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between;">
-                                <span style="color: #4b5563; font-size: 14px;">Promedio por Gasto:</span>
-                                <span style="font-weight: bold; color: #111827;">${formatCurrency(estadisticasGastos.promedioGasto)}</span>
-                            </div>
-                            <div style="font-weight: 600; color: #374151; margin-bottom: 10px; font-size: 13px;">Gastos por Categoría:</div>
-                            ${estadisticasGastos.gastosPorCategoria.slice(0, 5).map(cat => `
-                                <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${cat.color};"></div>
-                                        <span style="font-size: 12px; color: #4b5563;">${cat.categoria}</span>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <div style="font-weight: bold; font-size: 13px; color: #111827;">${formatCurrency(cat.total)}</div>
-                                        <div style="font-size: 10px; color: #6b7280;">${cat.porcentaje.toFixed(1)}%</div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Recomendaciones -->
-                    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                        <h3 style="color: #92400e; font-size: 16px; margin-bottom: 15px;">💡 Análisis y Recomendaciones</h3>
-                        <ul style="list-style: none; padding: 0; margin: 0;">
-                            ${recomendaciones.map(rec => `
-                                <li style="color: #78350f; font-size: 13px; margin-bottom: 8px; padding-left: 20px; position: relative;">
-                                    <span style="position: absolute; left: 0;">•</span> ${rec.mensaje}
-                                </li>
-                            `).join('')}
-                        </ul>
-                    </div>
-
-                    <!-- Footer -->
-                    <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 12px;">
-                        <p>Reporte generado el ${format(new Date(), "dd 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}</p>
-                        <p style="margin-top: 5px; font-weight: bold; color: #0891b2;">Lavandería Rodríguez</p>
-                    </div>
-                </div>
-            `;
-
-            // Crear elemento temporal
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = contenidoHTML;
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.top = '0';
-            document.body.appendChild(tempDiv);
-
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // Capturar como imagen
-            const canvas = await html2canvas(tempDiv, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                width: tempDiv.offsetWidth,
-                height: tempDiv.offsetHeight
-            });
-
-            document.body.removeChild(tempDiv);
-
-            // Crear PDF
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4',
-                compress: true
-            });
-
-            const imgWidth = 210;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            const pageHeight = 297;
-            let heightLeft = imgHeight;
-            let position = 0;
-
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-            heightLeft -= pageHeight;
-
-            while (heightLeft > 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-                heightLeft -= pageHeight;
-            }
-
-            const nombreArchivo = `Reporte_Financiero_${format(new Date(), 'yyyy-MM-dd_HHmm')}.pdf`;
+            const { pdf, nombreArchivo } = await generarDocumentoPDF();
             pdf.save(nombreArchivo);
-
+            
             toast.dismiss(toastId);
             toast.success('¡PDF descargado exitosamente!');
         } catch (error) {
             console.error('Error al exportar:', error);
             toast.dismiss(toastId);
             toast.error('Error al generar el PDF');
+        }
+    };
+
+    // NUEVO: Función para compartir nativamente (WhatsApp)
+    const compartirPorWhatsApp = async () => {
+        if (!reporteCompleto) {
+            toast.error('No hay datos para compartir');
+            return;
+        }
+
+        const toastId = toast.loading('Preparando documento para compartir...');
+
+        try {
+            const { pdf, nombreArchivo } = await generarDocumentoPDF();
+            
+            // Convertimos el PDF a un Blob y luego a File
+            const pdfBlob = pdf.output('blob');
+            const file = new File([pdfBlob], nombreArchivo, { type: 'application/pdf' });
+
+            // Verificamos si el navegador soporta compartir archivos
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                toast.dismiss(toastId);
+                await navigator.share({
+                    files: [file],
+                    title: 'Reporte Financiero',
+                    text: 'Adjunto el reporte financiero de la lavandería.'
+                });
+                toast.success('Compartido exitosamente');
+            } else {
+                // Fallback: Si es un navegador de escritorio antiguo que no soporta compartir archivos
+                toast.dismiss(toastId);
+                toast.info('Tu dispositivo no soporta compartir directamente. El archivo se descargará.');
+                pdf.save(nombreArchivo);
+            }
+        } catch (error: any) {
+            console.error('Error al compartir:', error);
+            toast.dismiss(toastId);
+            // Ignoramos el error si el usuario simplemente cerró la ventana de compartir de su celular
+            if (error.name !== 'AbortError') {
+                toast.error('Error al preparar el archivo para compartir');
+            }
         }
     };
 
@@ -366,16 +406,30 @@ export default function ReportesPage() {
                         Cuadres de caja, ganancias y análisis detallado del negocio
                     </p>
                 </div>
-                <button
-                    onClick={exportarReportePDF}
-                    disabled={!reporteCompleto}
-                    className={`w-full sm:w-auto flex justify-center items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-md gap-2 ${
-                        !reporteCompleto ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                >
-                    <Download className="h-4 w-4" />
-                    Exportar PDF
-                </button>
+                
+                {/* BOTONES DE ACCIÓN ACTUALIZADOS */}
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <button
+                        onClick={compartirPorWhatsApp}
+                        disabled={!reporteCompleto}
+                        className={`w-full sm:w-auto flex justify-center items-center px-4 py-2 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] transition-all shadow-md gap-2 ${
+                            !reporteCompleto ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
+                        <Share2 className="h-4 w-4" />
+                        Compartir
+                    </button>
+                    <button
+                        onClick={exportarReportePDF}
+                        disabled={!reporteCompleto}
+                        className={`w-full sm:w-auto flex justify-center items-center px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all shadow-md gap-2 ${
+                            !reporteCompleto ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
+                        <Download className="h-4 w-4" />
+                        Descargar PDF
+                    </button>
+                </div>
             </div>
 
             {/* FILTROS DE PERÍODO - COLAPSABLE */}

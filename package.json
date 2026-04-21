@@ -12,6 +12,7 @@
   "dependencies": {
     "date-fns": "^4.1.0",
     "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.14.0",
     "jspdf": "^4.2.1",
     "lodash": "^4.17.23",
     "lucide-react": "^0.562.0",
