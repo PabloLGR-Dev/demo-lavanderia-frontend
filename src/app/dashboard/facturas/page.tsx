@@ -976,7 +976,7 @@ export default function FacturasPage() {
                                         <span className="text-gray-600">Entrega:</span>
                                         <span className="font-medium text-gray-900">
                                             {entrega.fechaEntregaEstimada
-                                                ? format(parseISO(entrega.fechaEntregaEstimada), 'dd/MM/yyyy', { locale: es })
+                                                ? entrega.fechaEntregaEstimada.substring(0, 10).split('-').reverse().join('/')
                                                 : 'Sin fecha'}
                                         </span>
                                     </div>
@@ -1062,7 +1062,7 @@ export default function FacturasPage() {
                                                 </div>
                                                 {factura.fechaEntregaEstimada && (
                                                     <div className="text-xs text-gray-500">
-                                                        Entrega: {format(parseISO(factura.fechaEntregaEstimada), 'dd/MM/yy', { locale: es })}
+                                                        Entrega: {factura.fechaEntregaEstimada.substring(0, 10).split('-').reverse().join('/')}
                                                     </div>
                                                 )}
                                             </td>

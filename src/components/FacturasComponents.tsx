@@ -1269,7 +1269,7 @@ export default function FacturasComponents({
                                 <div>
                                     <span className="text-gray-600">Entrega Estimada:</span>
                                     <p className="font-medium text-gray-900">
-                                        {format(parseISO(preparedFacturaDto.fechaEntregaEstimada), 'dd/MM/yyyy', { locale: es })}
+                                        {preparedFacturaDto.fechaEntregaEstimada.substring(0, 10).split('-').reverse().join('/')}
                                     </p>
                                 </div>
                                 <div>
@@ -1670,7 +1670,7 @@ export default function FacturasComponents({
                                                     <span className="text-gray-600">Estimada:</span>
                                                     <span className="font-medium text-gray-900">
                                                         {facturaDetalles.fechaEntregaEstimada
-                                                            ? format(parseISO(facturaDetalles.fechaEntregaEstimada), 'dd/MM/yyyy', { locale: es })
+                                                            ? facturaDetalles.fechaEntregaEstimada.substring(0, 10).split('-').reverse().join('/')
                                                             : 'Sin fecha'}
                                                     </span>
                                                 </div>
