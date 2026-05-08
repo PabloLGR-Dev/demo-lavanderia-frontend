@@ -70,10 +70,31 @@ src/
 
 ## Roles
 
-The application has two roles with distinct access levels:
+### Demo credentials
 
-- **Admin** — full access to all pages including catalog management and settings.
-- **Empleado** — access to operational pages (invoices, deliveries, expenses, clients, reports).
+| Role | Username | Password |
+|---|---|---|
+| Admin | `admin` | `P@ssw0rd` |
+| Empleado | `empleado` | `P@ssw0rd` |
+
+### Access differences
+
+| Feature | Admin | Empleado |
+|---|---|---|
+| Dashboard | Yes | Yes |
+| Facturas | Yes | Yes |
+| Grupos de Facturas | Yes | Yes |
+| Entregas | Yes | Yes |
+| Gastos | Yes | Yes |
+| Clientes | Yes | Yes |
+| Reportes | Yes | Yes |
+| Servicios | Yes | No |
+| Prendas | Yes | No |
+| Configuracion | Yes | No |
+
+**Admin** can manage the full catalog (services, garment types, prices) and system settings (feature toggles, exchange rates). These pages are hidden from the sidebar and blocked at the route level for Empleado users.
+
+**Empleado** covers day-to-day operations: creating and reviewing invoices, logging expenses, managing deliveries, and consulting reports. They cannot modify catalog data or system configuration.
 
 Route protection is enforced in [src/lib/roleConfig.ts](src/lib/roleConfig.ts) and applied by the dashboard layout.
 
