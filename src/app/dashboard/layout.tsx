@@ -129,6 +129,7 @@ export default function DashboardLayout({
                     <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
                         {navigation.map((item) => {
                             const isActive = pathname === item.href;
+                            const Icon = item.icon;
                             return (
                                 <Link
                                     key={item.name}
@@ -139,7 +140,7 @@ export default function DashboardLayout({
                                             : 'text-blue-50 hover:bg-white/10 hover:text-white'
                                     }`}
                                 >
-                                    <span className="text-xl mr-3">{item.icon}</span>
+                                    <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
                                     {item.name}
                                 </Link>
                             );

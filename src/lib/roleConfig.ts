@@ -1,4 +1,19 @@
 // src/lib/roleConfig.ts
+import {
+    LayoutDashboard,
+    Receipt,
+    Truck,
+    CreditCard,
+    Users,
+    Scissors,
+    Shirt,
+    FolderOpen,
+    Package,
+    BarChart2,
+    UserCog,
+    Settings
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 export const ROLES = {
     ADMIN: 1,
@@ -36,77 +51,77 @@ export const ROLE_ROUTES = {
 } as const;
 
 // Define qué elementos del menú puede ver cada rol
-export const MENU_ITEMS = [
+export const MENU_ITEMS: { name: string; href: string; icon: LucideIcon; allowedRoles: RoleId[] }[] = [
     {
         name: 'Dashboard',
         href: '/dashboard',
-        icon: '📊',
+        icon: LayoutDashboard,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {
         name: 'Facturas',
         href: '/dashboard/facturas',
-        icon: '🧾',
+        icon: Receipt,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {
         name: 'Entregas De Facturas',
         href: '/dashboard/entregas',
-        icon: '🥼',
+        icon: Truck,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {
         name: 'Gastos',
         href: '/dashboard/gastos',
-        icon: '💳',
+        icon: CreditCard,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {
         name: 'Clientes',
         href: '/dashboard/clientes',
-        icon: '👥',
+        icon: Users,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {
         name: 'Servicios',
         href: '/dashboard/servicios',
-        icon: '🛍️',
+        icon: Scissors,
         allowedRoles: [ROLES.ADMIN]
     },
     {
         name: 'Prendas',
         href: '/dashboard/prendas',
-        icon: '👕',
+        icon: Shirt,
         allowedRoles: [ROLES.ADMIN]
     },
     {
         name: 'Categorías de Productos',
         href: '/dashboard/categorias',
-        icon: '🧺️',
+        icon: FolderOpen,
         allowedRoles: [ROLES.ADMIN]
     },
     {
         name: 'Productos',
         href: '/dashboard/productos',
-        icon: '🛒',
+        icon: Package,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {
         name: 'Reportes',
         href: '/dashboard/reportes',
-        icon: '📈',
+        icon: BarChart2,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {
         name: 'Usuarios',
         href: '/dashboard/usuarios',
-        icon: '👤',
+        icon: UserCog,
         allowedRoles: [ROLES.ADMIN]
     },
     {
         name: 'Configuración',
         href: '/dashboard/configuracion',
-        icon: '⚙️',
+        icon: Settings,
         allowedRoles: [ROLES.ADMIN]
     },
 ];

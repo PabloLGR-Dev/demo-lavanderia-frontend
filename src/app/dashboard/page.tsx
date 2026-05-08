@@ -14,7 +14,13 @@ import {
     AlertCircle,
     Calendar,
     ArrowDownCircle,
-    ArrowUpCircle
+    ArrowUpCircle,
+    Receipt,
+    CheckCircle2,
+    Clock,
+    Banknote,
+    User,
+    BarChart2
 } from 'lucide-react';
 // Formatear moneda
 const formatCurrency = (amount: number): string => {
@@ -86,9 +92,9 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600 mb-1">
-                                💰 Ingresos del Mes
+                                Ingresos del Mes
                             </p>
-                            <p className="text-3xl font-bold text-green-600">
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 leading-tight">
                                 {formatCurrency(resumenFinanciero.totalIngresos)}
                             </p>
                             <p className="text-xs text-gray-500 mt-2">
@@ -104,9 +110,9 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600 mb-1">
-                                📉 Gastos del Mes
+                                Gastos del Mes
                             </p>
-                            <p className="text-3xl font-bold text-red-600">
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 leading-tight">
                                 {formatCurrency(resumenFinanciero.totalGastos)}
                             </p>
                             <p className="text-xs text-gray-500 mt-2">
@@ -124,9 +130,9 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600 mb-1">
-                                📊 Ganancia Neta
+                                Ganancia Neta
                             </p>
-                            <p className={`text-3xl font-bold ${
+                            <p className={`text-xl sm:text-2xl lg:text-3xl font-bold leading-tight ${
                                 resumenFinanciero.gananciaNeta >= 0 ? 'text-cyan-600' : 'text-orange-600'
                             }`}>
                                 {formatCurrency(resumenFinanciero.gananciaNeta)}
@@ -148,9 +154,9 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600 mb-1">
-                                📈 Margen de Ganancia
+                                Margen de Ganancia
                             </p>
-                            <p className="text-3xl font-bold text-blue-600">
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 leading-tight">
                                 {resumenFinanciero.margenGanancia.toFixed(1)}%
                             </p>
                             <p className="text-xs text-gray-500 mt-2">
@@ -171,11 +177,13 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 mb-1">
                                 Facturas del Mes
                             </p>
-                            <p className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                            <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
                                 {estadisticasFacturas.totalFacturas}
                             </p>
                         </div>
-                        <div className="text-3xl">🧾</div>
+                        <div className="p-2 bg-cyan-100 rounded-lg">
+                            <Receipt className="h-7 w-7 text-cyan-600" />
+                        </div>
                     </div>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-green-100">
@@ -184,11 +192,13 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 mb-1">
                                 Facturas Pagadas
                             </p>
-                            <p className="text-2xl font-bold text-green-600">
+                            <p className="text-xl sm:text-2xl font-bold text-green-600">
                                 {estadisticasFacturas.facturasPagadas}
                             </p>
                         </div>
-                        <div className="text-3xl">✅</div>
+                        <div className="p-2 bg-green-100 rounded-lg">
+                            <CheckCircle2 className="h-7 w-7 text-green-600" />
+                        </div>
                     </div>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
@@ -197,11 +207,13 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 mb-1">
                                 Pendientes de Pago
                             </p>
-                            <p className="text-2xl font-bold text-orange-600">
+                            <p className="text-xl sm:text-2xl font-bold text-orange-600">
                                 {estadisticasFacturas.facturasPendientes}
                             </p>
                         </div>
-                        <div className="text-3xl">⏳</div>
+                        <div className="p-2 bg-orange-100 rounded-lg">
+                            <Clock className="h-7 w-7 text-orange-600" />
+                        </div>
                     </div>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-purple-100">
@@ -210,11 +222,13 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 mb-1">
                                 Promedio por Factura
                             </p>
-                            <p className="text-2xl font-bold text-green-600">
+                            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 leading-tight">
                                 {formatCurrency(estadisticasFacturas.promedioVenta)}
                             </p>
                         </div>
-                        <div className="text-3xl">💵</div>
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                            <Banknote className="h-7 w-7 text-purple-600" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -330,7 +344,7 @@ export default function DashboardPage() {
                             onClick={() => router.push('/dashboard/facturas')}
                             className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100 rounded-xl text-left transition-all group shadow-sm hover:shadow-md"
                         >
-                            <div className="text-3xl mb-2">🧾</div>
+                            <Receipt className="h-8 w-8 text-cyan-600 mb-2" />
                             <p className="font-medium text-gray-900 group-hover:text-cyan-600 text-sm">
                                 Nueva Factura
                             </p>
@@ -339,7 +353,7 @@ export default function DashboardPage() {
                             onClick={() => router.push('/dashboard/clientes')}
                             className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-xl text-left transition-all group shadow-sm hover:shadow-md"
                         >
-                            <div className="text-3xl mb-2">👤</div>
+                            <User className="h-8 w-8 text-green-600 mb-2" />
                             <p className="font-medium text-gray-900 group-hover:text-green-600 text-sm">
                                 Nuevo Cliente
                             </p>
@@ -348,7 +362,7 @@ export default function DashboardPage() {
                             onClick={() => router.push('/dashboard/gastos')}
                             className="p-4 bg-gradient-to-br from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 rounded-xl text-left transition-all group shadow-sm hover:shadow-md"
                         >
-                            <div className="text-3xl mb-2">💸</div>
+                            <TrendingDown className="h-8 w-8 text-red-600 mb-2" />
                             <p className="font-medium text-gray-900 group-hover:text-red-600 text-sm">
                                 Registrar Gasto
                             </p>
@@ -357,7 +371,7 @@ export default function DashboardPage() {
                             onClick={() => router.push('/dashboard/reportes')}
                             className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 rounded-xl text-left transition-all group shadow-sm hover:shadow-md"
                         >
-                            <div className="text-3xl mb-2">📊</div>
+                            <BarChart2 className="h-8 w-8 text-purple-600 mb-2" />
                             <p className="font-medium text-gray-900 group-hover:text-purple-600 text-sm">
                                 Ver Reportes
                             </p>

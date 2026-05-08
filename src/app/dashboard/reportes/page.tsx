@@ -16,7 +16,10 @@ import {
     Filter,
     ChevronDown,
     ChevronUp,
-    Share2 // <-- Importamos el icono para compartir
+    Share2,
+    Lightbulb,
+    CheckCircle2,
+    AlertTriangle
 } from 'lucide-react';
 import { format, parseISO, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, startOfDay, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -159,7 +162,7 @@ export default function ReportesPage() {
                         <img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #0891b2;">
                         <h2 style="color: #0891b2; font-size: 32px; font-weight: bold; margin: 0;">Lavandería Rodríguez</h2>
                     </div>
-                    <h1 style="color: #0891b2; font-size: 28px; margin: 10px 0;">💰 Reporte Financiero</h1>
+                    <h1 style="color: #0891b2; font-size: 28px; margin: 10px 0;">Reporte Financiero</h1>
                     <p style="color: #666; font-size: 14px;">Cuadre de Caja y Análisis del Negocio</p>
                 </div>
 
@@ -168,7 +171,7 @@ export default function ReportesPage() {
                 </div>
 
                 <div style="background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px;">
-                    <h2 style="font-size: 22px; margin-bottom: 20px; margin-top: 0;">💰 Cuadre de Caja</h2>
+                    <h2 style="font-size: 22px; margin-bottom: 20px; margin-top: 0;">Cuadre de Caja</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
                         <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px;">
                             <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">INGRESOS</div>
@@ -187,7 +190,7 @@ export default function ReportesPage() {
                         </div>
                     </div>
                     <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold;">
-                        Estado: ${resumenFinanciero.gananciaNeta >= 0 ? '✅ RENTABLE' : '⚠️ PÉRDIDAS'}
+                        Estado: ${resumenFinanciero.gananciaNeta >= 0 ? 'RENTABLE' : 'PÉRDIDAS'}
                     </div>
                 </div>
 
@@ -247,7 +250,7 @@ export default function ReportesPage() {
                 </div>
 
                 <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                    <h3 style="color: #92400e; font-size: 16px; margin-bottom: 15px; margin-top: 0;">💡 Análisis y Recomendaciones</h3>
+                    <h3 style="color: #92400e; font-size: 16px; margin-bottom: 15px; margin-top: 0;">Análisis y Recomendaciones</h3>
                     <ul style="list-style: none; padding: 0; margin: 0;">
                         ${recomendaciones.map(rec => `
                             <li style="color: #78350f; font-size: 13px; margin-bottom: 8px; padding-left: 20px; position: relative;">
@@ -536,7 +539,7 @@ export default function ReportesPage() {
                     <div className="bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-700 rounded-xl shadow-2xl p-8 text-white">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="text-2xl font-bold mb-1">💰 Cuadre de Caja</h3>
+                                <h3 className="text-2xl font-bold mb-1">Cuadre de Caja</h3>
                                 <p className="text-blue-100 text-sm">
                                     Resumen financiero del período
                                 </p>
@@ -592,8 +595,10 @@ export default function ReportesPage() {
                         <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-lg">
                             <div className="flex items-center justify-between text-sm">
                                 <span>Estado del negocio:</span>
-                                <span className="font-bold text-lg">
-                                    {reporteCompleto.resumenFinanciero.gananciaNeta >= 0 ? '✅ RENTABLE' : '⚠️ PÉRDIDAS'}
+                                <span className="font-bold text-lg flex items-center gap-2">
+                                    {reporteCompleto.resumenFinanciero.gananciaNeta >= 0
+                                        ? <><CheckCircle2 className="h-5 w-5 text-green-300" /> RENTABLE</>
+                                        : <><AlertTriangle className="h-5 w-5 text-yellow-300" /> PÉRDIDAS</>}
                                 </span>
                             </div>
                         </div>
@@ -748,7 +753,10 @@ export default function ReportesPage() {
                             <div className="flex items-start gap-3">
                                 <PieChart className="h-6 w-6 text-purple-600 flex-shrink-0 mt-1" />
                                 <div>
-                                    <h4 className="font-bold text-red-600 mb-2">💡 Análisis y Recomendaciones</h4>
+                                    <h4 className="font-bold text-red-600 mb-2 flex items-center gap-2">
+                                        <Lightbulb className="h-5 w-5 text-purple-600" />
+                                        Análisis y Recomendaciones
+                                    </h4>
                                     <ul className="space-y-2 text-sm text-orange-800">
                                         {reporteCompleto.recomendaciones.map((rec, index) => (
                                             <li key={index}>{rec.mensaje}</li>

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { API_ENDPOINTS } from '@/lib/api';
 import { ConfiguracionesGenerales } from '@/types';
 import { toast } from 'sonner';
-import { Package, Truck, DollarSign, Plus, Edit2, X } from 'lucide-react';
+import { Package, Truck, DollarSign, Plus, Edit2, X, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface DivisaConfig {
@@ -205,10 +205,10 @@ export default function ConfiguracionPage() {
                         <div className="space-y-2 text-sm">
                             <div className={`p-3 rounded-lg ${config.controlStockActivo ? 'bg-green-50' : 'bg-gray-50'}`}>
                                 <p className="font-medium text-gray-700">Estado: {config.controlStockActivo ? 'Activo' : 'Inactivo'}</p>
-                                <p className="text-gray-600 mt-1">
+                                <p className="text-gray-600 mt-1 flex items-start gap-1.5">
                                     {config.controlStockActivo
-                                        ? '✓ El sistema valida el stock antes de crear facturas'
-                                        : '⨯ Se pueden crear facturas sin validar stock'}
+                                        ? <><Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" /><span>El sistema valida el stock antes de crear facturas</span></>
+                                        : <><X className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" /><span>Se pueden crear facturas sin validar stock</span></>}
                                 </p>
                             </div>
                         </div>
@@ -243,10 +243,10 @@ export default function ConfiguracionPage() {
                         <div className="space-y-2 text-sm">
                             <div className={`p-3 rounded-lg ${config.controlEntregasActivo ? 'bg-green-50' : 'bg-gray-50'}`}>
                                 <p className="font-medium text-gray-700">Estado: {config.controlEntregasActivo ? 'Activo' : 'Inactivo'}</p>
-                                <p className="text-gray-600 mt-1">
+                                <p className="text-gray-600 mt-1 flex items-start gap-1.5">
                                     {config.controlEntregasActivo
-                                        ? '✓ Se gestionan estados de entrega de pedidos'
-                                        : '⨯ No se gestionan entregas separadamente'}
+                                        ? <><Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" /><span>Se gestionan estados de entrega de pedidos</span></>
+                                        : <><X className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" /><span>No se gestionan entregas separadamente</span></>}
                                 </p>
                             </div>
                         </div>

@@ -31,7 +31,13 @@ import {
     ChevronDown,
     ChevronUp,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    User,
+    ShoppingBag,
+    ShoppingCart,
+    Package,
+    Shirt,
+    Tag
 } from 'lucide-react';
 import { format, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -826,7 +832,7 @@ export default function FacturasComponents({
                                         {/* Información del Cliente */}
                                         <div>
                                             <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-sm">
-                                                👤 Datos del Cliente
+                                                <User className="h-4 w-4" /> Datos del Cliente
                                             </h4>
                                             <div className="flex items-center gap-4 mb-3">
                                                 <label className="flex items-center gap-2 text-xs">
@@ -898,7 +904,7 @@ export default function FacturasComponents({
                                         {/* Sección para Agregar Items */}
                                         <div>
                                             <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-sm">
-                                                🛍️ Items
+                                                <ShoppingBag className="h-4 w-4" /> Items
                                             </h4>
                                             {!nuevoItem ? (
                                                 <div className="flex gap-2">
@@ -922,8 +928,10 @@ export default function FacturasComponents({
                                             ) : (
                                                 <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 rounded-lg border-2 border-cyan-200">
                                                     <div className="flex items-center justify-between mb-3">
-                                                        <span className="text-xs font-semibold text-cyan-700 uppercase">
-                                                            {nuevoItem.tipo === 'servicio' ? '🧺 Nuevo Servicio' : '📦 Nuevo Producto'}
+                                                        <span className="text-xs font-semibold text-cyan-700 uppercase flex items-center gap-1">
+                                                            {nuevoItem.tipo === 'servicio'
+                                                                ? <><Shirt className="h-3.5 w-3.5" /> Nuevo Servicio</>
+                                                                : <><Package className="h-3.5 w-3.5" /> Nuevo Producto</>}
                                                         </span>
                                                         <button
                                                             type="button"
@@ -1078,7 +1086,7 @@ export default function FacturasComponents({
                                         {/* Fecha de Entrega */}
                                         <div>
                                             <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-sm">
-                                                📅 Fecha de Entrega
+                                                <Calendar className="h-4 w-4" /> Fecha de Entrega
                                             </h4>
                                             <input
                                                 type="date"
@@ -1094,7 +1102,7 @@ export default function FacturasComponents({
                                         {/* Notas */}
                                         <div>
                                             <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-sm">
-                                                📝 Notas
+                                                <FileText className="h-4 w-4" /> Notas
                                             </h4>
                                             <textarea
                                                 value={facturaForm.notas}
@@ -1110,7 +1118,7 @@ export default function FacturasComponents({
                                 <div className="w-full lg:w-1/2 bg-white lg:overflow-y-auto relative">
                                     <div className="sticky top-0 bg-white z-[40] pb-4 mb-4 border-b shadow-sm px-4 lg:px-6 pt-4 lg:pt-6">
                                         <h4 className="font-bold text-md text-gray-800 flex items-center gap-2">
-                                            🛒 Items Facturados
+                                            <ShoppingCart className="h-4 w-4" /> Items Facturados
                                         </h4>
                                         <p className="text-xs text-gray-500 mt-1">
                                             {facturaForm.detalles.length} {facturaForm.detalles.length === 1 ? 'item' : 'items'}
@@ -1120,7 +1128,7 @@ export default function FacturasComponents({
                                         {facturaForm.detalles.length === 0 ? (
                                             <div
                                                 className="flex flex-col items-center justify-center py-12 text-center">
-                                                <div className="text-5xl mb-3 opacity-50">🛍️</div>
+                                                <ShoppingBag className="h-12 w-12 mb-3 text-gray-300" />
                                                 <p className="text-gray-500 font-medium text-sm">El carrito está
                                                     vacío</p>
                                                 <p className="text-xs text-gray-400 mt-1">
@@ -1136,8 +1144,10 @@ export default function FacturasComponents({
                                                     <div className="flex items-start justify-between mb-2">
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2 mb-1">
-                                                                <span className="text-sm">
-                                                                    {detalle.tipo === 'servicio' ? '🧺' : '📦'}
+                                                                <span className="text-gray-500">
+                                                                    {detalle.tipo === 'servicio'
+                                                                        ? <Shirt className="h-4 w-4" />
+                                                                        : <Package className="h-4 w-4" />}
                                                                 </span>
                                                                 <span
                                                                     className="font-semibold text-gray-900 text-xs truncate max-w-[200px]">
@@ -1305,7 +1315,7 @@ export default function FacturasComponents({
                             {/* Descuento */}
                             <div className="border-t pt-4">
                                 <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    💰 Descuento
+                                    <Tag className="h-4 w-4" /> Descuento
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                                     <div className="sm:col-span-1">
@@ -1419,7 +1429,7 @@ export default function FacturasComponents({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <CreditCard className="h-5 w-5 text-green-600" />
-                                        <span className="font-bold text-green-700 text-sm">💳 PAGAR AHORA</span>
+                                        <span className="font-bold text-green-700 text-sm">PAGAR AHORA</span>
                                     </div>
                                 </label>
                                 {confirmationFormLocal.pagoInmediato && (
@@ -1704,8 +1714,9 @@ export default function FacturasComponents({
                                                 <tr key={index} className="hover:bg-gray-50">
                                                     <td className="px-4 py-3 text-sm">
                                                         <div>
-                                                            <p className="font-medium text-gray-900">
-                                                                {detalle.tipo === 'servicio' ? '🧺' : '📦'} {detalle.descripcion ||
+                                                            <p className="font-medium text-gray-900 flex items-center gap-1.5">
+                                                                {detalle.tipo === 'servicio' ? <Shirt className="h-4 w-4 text-gray-500 flex-shrink-0" /> : <Package className="h-4 w-4 text-gray-500 flex-shrink-0" />}
+                                                                {detalle.descripcion ||
                                                                 (detalle.tipo === 'servicio' ? detalle.servicio?.prenda + ' - ' + detalle.servicio?.servicio :
                                                                     detalle.producto?.nombre)}
                                                             </p>
