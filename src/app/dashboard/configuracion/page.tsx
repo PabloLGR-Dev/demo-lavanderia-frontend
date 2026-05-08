@@ -86,11 +86,10 @@ export default function ConfiguracionPage() {
             if (response.ok) {
                 const data = await response.json();
                 toast.success(data.mensaje);
-                fetchData();
-                router.refresh();
+                window.location.reload();
             }
         } catch (error) {
-            toast.error('Error al actualizar configuración');
+            toast.error('Error al actualizar configuracion');
         }
     };
 
@@ -164,7 +163,6 @@ export default function ConfiguracionPage() {
         <div className="flex justify-center">
             <div className="w-full max-w-5xl space-y-6 pb-12">
 
-                {/* ✅ CAMBIO 2: text-left añadido al div del encabezado */}
                 <div className="text-left">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
                         Configuración del Sistema
@@ -328,7 +326,6 @@ export default function ConfiguracionPage() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Moneda (Ej: USD, EUR) *
                                     </label>
-                                    {/* ✅ CAMBIO 1: text-gray-900 añadido */}
                                     <input
                                         type="text"
                                         required
@@ -344,7 +341,6 @@ export default function ConfiguracionPage() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Valor en Pesos (RD$) *
                                     </label>
-                                    {/* ✅ CAMBIO 1: text-gray-900 añadido */}
                                     <input
                                         type="number"
                                         step="0.01"
@@ -361,7 +357,6 @@ export default function ConfiguracionPage() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Descripción (Opcional)
                                     </label>
-                                    {/* ✅ CAMBIO 1: text-gray-900 añadido */}
                                     <input
                                         type="text"
                                         value={divisaForm.descripcion}

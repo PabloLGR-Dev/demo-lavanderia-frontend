@@ -20,16 +20,14 @@ export default function DashboardLayout({
     const router = useRouter();
     const pathname = usePathname();
     
-    // ✅ CORRECCIÓN 1: Iniciar en false. En escritorio siempre se verá gracias a lg:translate-x-0
-    const [sidebarOpen, setSidebarOpen] = useState(false); 
-    
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     const [config, setConfig] = useState<ConfiguracionesGenerales>({
         controlStockActivo: false,
         controlEntregasActivo: false,
     });
     const [configLoading, setConfigLoading] = useState(true);
 
-    // ✅ CORRECCIÓN 2: Cerrar el menú automáticamente al cambiar de ruta en móviles
     useEffect(() => {
         setSidebarOpen(false);
     }, [pathname]);
@@ -168,7 +166,6 @@ export default function DashboardLayout({
                 </div>
             </aside>
 
-            {/* ✅ CORRECCIÓN 3: Main Content siempre tiene padding en escritorio (lg:pl-64) sin depender del estado del móvil */}
             <div className="transition-all duration-300 lg:pl-64">
                 {/* Top Bar */}
                 <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-cyan-100">

@@ -29,21 +29,17 @@ export default function PrendasPage() {
         precioUnitario: '',
     });
 
-    // ✅ OPTIMIZACIÓN 1: Cargar servicios solo una vez al inicio
     useEffect(() => {
         fetchServicios();
     }, []);
 
-    // ✅ OPTIMIZACIÓN 2: Cargar prendas cuando cambie el searchTerm (con debounce implícito)
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchPrendas();
-        }, 300); // Debounce de 300ms
-
+        }, 300);
         return () => clearTimeout(timer);
     }, [searchTerm]);
 
-    // ✅ OPTIMIZACIÓN 3: Separar fetch de servicios (solo se llama una vez)
     const fetchServicios = async () => {
         try {
             const token = localStorage.getItem('accessToken');
@@ -61,7 +57,6 @@ export default function PrendasPage() {
         }
     };
 
-    // ✅ OPTIMIZACIÓN 4: Fetch de prendas mejorado
     const fetchPrendas = async () => {
         try {
             setLoading(true);
@@ -89,7 +84,6 @@ export default function PrendasPage() {
         }
     };
 
-    // ✅ OPTIMIZACIÓN 5: Callback optimizado para refrescar
     const refreshData = useCallback(() => {
         fetchPrendas();
     }, [searchTerm]);

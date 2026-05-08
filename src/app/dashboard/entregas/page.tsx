@@ -646,7 +646,6 @@ export default function EntregasPage() {
 
                                 <div className="space-y-2">
                                     <div className="flex gap-2">
-                                        {/* ✅ BOTÓN VER DETALLE CON LOADER */}
                                         <button
                                             onClick={() => handleOpenDetail(factura.idFactura)}
                                             disabled={isLoadingThisRow && actionType === 'detail'}
@@ -660,7 +659,6 @@ export default function EntregasPage() {
                                             Ver Detalle
                                         </button>
 
-                                        {/* ✅ BOTÓN ENTREGAR CON LOADER */}
                                         {esPendiente ? (
                                             <button
                                                 onClick={() => handleOpenModal(factura)}
