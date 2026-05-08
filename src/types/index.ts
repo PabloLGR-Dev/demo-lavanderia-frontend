@@ -540,3 +540,72 @@ export interface Recomendacion {
     mensaje: string;
     icono?: string;
 }
+
+// ============ GRUPOS DE FACTURAS TYPES ============
+
+export interface GrupoFacturasResumen {
+    idGrupo: number;
+    nombre: string;
+    idCliente?: number;
+    nombreCliente?: string;
+    notas?: string;
+    idEstado: number;
+    estadoNombre: string;
+    fechaCreacion: string;
+    fechaUltimaActualizacion: string;
+    totalFacturas: number;
+    totalMonto: number;
+    totalAbonado: number;
+    totalPendiente: number;
+}
+
+export interface GrupoFacturasDetalle extends GrupoFacturasResumen {
+    facturas: Array<{
+        idFactura: number;
+        numeroFactura: string;
+        nombreCliente: string;
+        fechaCreacion: string;
+        fechaEntregaEstimada?: string;
+        total: number;
+        montoAbonado: number;
+        montoPendiente: number;
+        estado: { idEstado: number; nombre: string };
+    }>;
+    historialPagos: Array<{
+        idPago: number;
+        idFactura: number;
+        numeroFactura: string;
+        monto: number;
+        fechaPago: string;
+        metodoPago: string;
+        referencia?: string;
+        notas?: string;
+        usuario: string;
+    }>;
+}
+
+export interface FacturaDisponible {
+    idFactura: number;
+    numeroFactura: string;
+    nombreCliente: string;
+    fechaCreacion: string;
+    total: number;
+    montoAbonado: number;
+    montoPendiente: number;
+    estado: { idEstado: number; nombre: string };
+}
+
+export interface CreateGrupoDto {
+    nombre: string;
+    idCliente?: number;
+    nombreCliente?: string;
+    notas?: string;
+    idsFacturas?: number[];
+}
+
+export interface PagarGrupoDto {
+    monto: number;
+    metodoPago: 'efectivo' | 'tarjeta' | 'transferencia' | 'otro';
+    referencia?: string;
+    notas?: string;
+}

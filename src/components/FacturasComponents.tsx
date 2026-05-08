@@ -182,6 +182,7 @@ export default function FacturasComponents({
         telefonoCliente: string;
         fechaEntregaEstimada: string;
         notas: string;
+        idGrupo: string;
         detalles: Array<{
             tipo: 'servicio' | 'producto';
             searchTerm: string;
@@ -200,8 +201,11 @@ export default function FacturasComponents({
         telefonoCliente: '',
         fechaEntregaEstimada: '',
         notas: '',
+        idGrupo: '',
         detalles: [],
     });
+
+    const [gruposActivos, setGruposActivos] = useState<{ idGrupo: number; nombre: string }[]>([]);
 
     // Formulario de confirmación
     const [confirmationFormLocal, setConfirmationFormLocal] = useState<{
@@ -341,6 +345,24 @@ export default function FacturasComponents({
         }
     };
 
+    // Cargar grupos activos cuando se abre el modal de nueva factura
+    useEffect(() => {
+        if (!showModal) return;
+        const fetchGrupos = async () => {
+            try {
+                const token = localStorage.getItem('accessToken');
+                const res = await fetch(`${API_ENDPOINTS.GRUPOS_FACTURAS_RESUMEN}?estadoId=4&pageSize=100`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setGruposActivos(data.data.map((g: any) => ({ idGrupo: g.idGrupo, nombre: g.nombre })));
+                }
+            } catch { /* silencioso */ }
+        };
+        fetchGrupos();
+    }, [showModal]);
+
     // ==================== RESET FORMULARIOS ====================
     const resetFacturaForm = () => {
         setFacturaForm({
@@ -350,6 +372,7 @@ export default function FacturasComponents({
             telefonoCliente: '',
             fechaEntregaEstimada: '',
             notas: '',
+            idGrupo: '',
             detalles: [],
         });
         setNuevoItem(null);
@@ -752,7 +775,25 @@ export default function FacturasComponents({
 
             if (response.ok) {
                 const data = await response.json();
-                toast.success('Factura creada exitosamente');
+
+                // Asignar al grupo si fue seleccionado
+                if (facturaForm.idGrupo && data?.idFactura) {
+                    try {
+                        await fetch(API_ENDPOINTS.GRUPO_FACTURAS_AGREGAR(parseInt(facturaForm.idGrupo)), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ idsFacturas: [data.idFactura] }),
+                        });
+                        const grupoNombre = gruposActivos.find(g => g.idGrupo === parseInt(facturaForm.idGrupo))?.nombre;
+                        toast.success(`Factura creada y agregada al grupo "${grupoNombre}"`);
+                    } catch {
+                        toast.success('Factura creada exitosamente');
+                        toast.warning('No se pudo asignar al grupo seleccionado');
+                    }
+                } else {
+                    toast.success('Factura creada exitosamente');
+                }
+
                 fetchFacturasResumen();
                 handleCloseAllModals();
                 return data;
@@ -1097,6 +1138,25 @@ export default function FacturasComponents({
                                             />
                                             <p className="text-xs text-gray-500 mt-1">
                                                 Si no se especifica, se usará la fecha actual
+                                            </p>
+                                        </div>
+                                        {/* Grupo de Facturas */}
+                                        <div>
+                                            <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-sm">
+                                                <Tag className="h-4 w-4" /> Grupo de Facturas
+                                            </h4>
+                                            <select
+                                                value={facturaForm.idGrupo}
+                                                onChange={(e) => setFacturaForm({ ...facturaForm, idGrupo: e.target.value })}
+                                                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900 text-sm"
+                                            >
+                                                <option value="">Sin grupo (opcional)</option>
+                                                {gruposActivos.map(g => (
+                                                    <option key={g.idGrupo} value={g.idGrupo}>{g.nombre}</option>
+                                                ))}
+                                            </select>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Agrega esta factura a un grupo de facturas existente
                                             </p>
                                         </div>
                                         {/* Notas */}

@@ -25,10 +25,13 @@ import {
     DollarSign,
     Printer,
     X,
-    Loader2
+    Loader2,
+    Layers,
+    FolderInput,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import Link from 'next/link';
 import FacturasComponents from '@/components/FacturasComponents';
 import PrintFactura from '@/components/PrintFactura';
 import { useRolePermissions } from '@/hooks/Userolepermissions';
@@ -266,6 +269,11 @@ export default function FacturasPage() {
     const [showPrintPromptModal, setShowPrintPromptModal] = useState(false);
     const [showCalculadoraCambio, setShowCalculadoraCambio] = useState(false);
     const [facturaParaImprimir, setFacturaParaImprimir] = useState<FacturaDetallesCompletos | null>(null);
+    const [showAsignarGrupoModal, setShowAsignarGrupoModal] = useState(false);
+    const [facturaParaAsignar, setFacturaParaAsignar] = useState<FacturaResumen | null>(null);
+    const [gruposParaAsignar, setGruposParaAsignar] = useState<{ idGrupo: number; nombre: string }[]>([]);
+    const [grupoAsignarId, setGrupoAsignarId] = useState('');
+    const [asignando, setAsignando] = useState(false);
 
     // Selección / formularios
     const [selectedFactura, setSelectedFactura] = useState<FacturaResumen | null>(null);
@@ -679,6 +687,48 @@ export default function FacturasPage() {
     };
 
     // ==========================================
+    // ASIGNAR A GRUPO
+    // ==========================================
+
+    const handleAbrirAsignarGrupo = async (factura: FacturaResumen) => {
+        setFacturaParaAsignar(factura);
+        setGrupoAsignarId('');
+        setShowAsignarGrupoModal(true);
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch(`${API_ENDPOINTS.GRUPOS_FACTURAS_RESUMEN}?estadoId=4&pageSize=100`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setGruposParaAsignar(data.data.map((g: any) => ({ idGrupo: g.idGrupo, nombre: g.nombre })));
+            }
+        } catch { /* silencioso */ }
+    };
+
+    const handleAsignarFacturaAGrupo = async () => {
+        if (!facturaParaAsignar || !grupoAsignarId) return;
+        setAsignando(true);
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch(API_ENDPOINTS.GRUPO_FACTURAS_AGREGAR(parseInt(grupoAsignarId)), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ idsFacturas: [facturaParaAsignar.idFactura] }),
+            });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
+            const grupoNombre = gruposParaAsignar.find(g => g.idGrupo === parseInt(grupoAsignarId))?.nombre;
+            toast.success(`Factura asignada al grupo "${grupoNombre}"`);
+            setShowAsignarGrupoModal(false);
+            setFacturaParaAsignar(null);
+        } catch (err: any) {
+            toast.error(err.message || 'Error al asignar factura');
+        } finally {
+            setAsignando(false);
+        }
+    };
+
+    // ==========================================
     // HELPERS
     // ==========================================
 
@@ -810,6 +860,12 @@ export default function FacturasPage() {
                     >
                         <DollarSign className="h-4 w-4" /> Calcular Cambio
                     </button>
+                    <Link
+                        href="/dashboard/grupos-facturas"
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all shadow-md flex items-center gap-2"
+                    >
+                        <Layers className="h-4 w-4" /> Grupos de Facturas
+                    </Link>
                     <button
                         onClick={() => setShowModal(true)}
                         className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md flex items-center gap-2"
@@ -1115,6 +1171,13 @@ export default function FacturasPage() {
                                                             <DollarSign className="h-4 w-4" />
                                                         </button>
                                                     )}
+                                                    <button
+                                                        onClick={() => handleAbrirAsignarGrupo(factura)}
+                                                        className="p-2 text-purple-600 hover:text-white hover:bg-purple-600 rounded-lg transition-all border border-purple-600"
+                                                        title="Asignar a grupo de facturas"
+                                                    >
+                                                        <FolderInput className="h-4 w-4" />
+                                                    </button>
                                                     {canDelete && (
                                                         <button
                                                             onClick={() => handleDelete(factura.idFactura)}
@@ -1499,6 +1562,65 @@ export default function FacturasPage() {
                     onClose={() => setShowCalculadoraCambio(false)}
                     formatCurrency={formatCurrency}
                 />
+            )}
+
+            {/* MODAL ASIGNAR A GRUPO */}
+            {showAsignarGrupoModal && facturaParaAsignar && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+                        <div className="flex items-center justify-between p-6 border-b">
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-800">Asignar a Grupo</h2>
+                                <p className="text-sm text-gray-500 mt-0.5">{facturaParaAsignar.numeroFactura} — {facturaParaAsignar.nombreCliente}</p>
+                            </div>
+                            <button onClick={() => setShowAsignarGrupoModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <X className="h-5 w-5 text-gray-500" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            {gruposParaAsignar.length === 0 ? (
+                                <div className="text-center py-6 text-gray-400">
+                                    <Layers className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                                    <p className="text-sm">No hay grupos activos disponibles</p>
+                                    <Link href="/dashboard/grupos-facturas" className="text-xs text-cyan-600 hover:underline mt-1 inline-block">
+                                        Crear un grupo
+                                    </Link>
+                                </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar grupo *</label>
+                                        <select
+                                            value={grupoAsignarId}
+                                            onChange={e => setGrupoAsignarId(e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                        >
+                                            <option value="">Selecciona un grupo...</option>
+                                            {gruposParaAsignar.map(g => (
+                                                <option key={g.idGrupo} value={g.idGrupo}>{g.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            onClick={() => setShowAsignarGrupoModal(false)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            onClick={handleAsignarFacturaAGrupo}
+                                            disabled={asignando || !grupoAsignarId}
+                                            className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-cyan-600 hover:to-blue-700 disabled:opacity-60 transition-all"
+                                        >
+                                            {asignando ? 'Asignando...' : 'Asignar'}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

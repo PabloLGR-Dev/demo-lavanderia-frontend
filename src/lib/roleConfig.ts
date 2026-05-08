@@ -11,7 +11,8 @@ import {
     Package,
     BarChart2,
     UserCog,
-    Settings
+    Settings,
+    Layers,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -38,6 +39,7 @@ export const ROLE_ROUTES = {
         '/dashboard/usuarios',
         '/dashboard/gastos',
         '/dashboard/configuracion',
+        '/dashboard/grupos-facturas',
     ],
     [ROLES.EMPLEADO]: [
         '/dashboard',
@@ -47,6 +49,7 @@ export const ROLE_ROUTES = {
         '/dashboard/clientes',
         '/dashboard/productos',
         '/dashboard/reportes',
+        '/dashboard/grupos-facturas',
     ],
 } as const;
 
@@ -62,6 +65,12 @@ export const MENU_ITEMS: { name: string; href: string; icon: LucideIcon; allowed
         name: 'Facturas',
         href: '/dashboard/facturas',
         icon: Receipt,
+        allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
+    },
+    {
+        name: 'Grupos de Facturas',
+        href: '/dashboard/grupos-facturas',
+        icon: Layers,
         allowedRoles: [ROLES.ADMIN, ROLES.EMPLEADO]
     },
     {

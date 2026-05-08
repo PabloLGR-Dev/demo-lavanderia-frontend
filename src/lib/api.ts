@@ -120,6 +120,16 @@ export const API_ENDPOINTS = {
     TOGGLE_CONTROL_STOCK: `${API_BASE_URL}/configuraciones/toggle-control-stock`,
     TOGGLE_CONTROL_ENTREGAS: `${API_BASE_URL}/configuraciones/toggle-control-entregas`,
 
+    // Grupos de Facturas
+    GRUPOS_FACTURAS_RESUMEN: `${API_BASE_URL}/grupos-facturas/resumen`,
+    GRUPOS_FACTURAS_DISPONIBLES: `${API_BASE_URL}/grupos-facturas/facturas-disponibles`,
+    GRUPOS_FACTURAS: `${API_BASE_URL}/grupos-facturas`,
+    GRUPO_FACTURAS_BY_ID: (id: number) => `${API_BASE_URL}/grupos-facturas/${id}`,
+    GRUPO_FACTURAS_PAGAR: (id: number) => `${API_BASE_URL}/grupos-facturas/${id}/pagar`,
+    GRUPO_FACTURAS_AGREGAR: (id: number) => `${API_BASE_URL}/grupos-facturas/${id}/facturas`,
+    GRUPO_FACTURAS_QUITAR: (id: number, idFactura: number) => `${API_BASE_URL}/grupos-facturas/${id}/facturas/${idFactura}`,
+    GRUPO_DE_FACTURA: (idFactura: number) => `${API_BASE_URL}/grupos-facturas/por-factura/${idFactura}`,
+
     // Entregas
     FACTURAS_ENTREGAS_RESUMEN: `${API_BASE_URL}/facturas/entregas-resumen`,
     FACTURAS_CONTADORES_ENTREGAS: `${API_BASE_URL}/facturas/contadores-entregas`,

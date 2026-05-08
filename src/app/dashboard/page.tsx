@@ -88,83 +88,67 @@ export default function DashboardPage() {
             </div>
             {/* Stats Grid Principal - Resumen Financiero */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-green-100 hover:shadow-xl transition-all hover:-translate-y-1">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-600 mb-1">
-                                Ingresos del Mes
-                            </p>
-                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 leading-tight">
+                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-green-100 hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-gray-600 mb-1">Ingresos del Mes</p>
+                            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 leading-tight break-words">
                                 {formatCurrency(resumenFinanciero.totalIngresos)}
                             </p>
-                            <p className="text-xs text-gray-500 mt-2">
-                                Facturas pagadas
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">Facturas pagadas</p>
                         </div>
-                        <div className="bg-gradient-to-br from-green-400 to-emerald-600 w-14 h-14 rounded-full flex items-center justify-center shadow-md">
-                            <TrendingUp className="h-7 w-7 text-white" />
+                        <div className="flex-shrink-0 bg-gradient-to-br from-green-400 to-emerald-600 w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-md">
+                            <TrendingUp className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                         </div>
                     </div>
                 </div>
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-red-100 hover:shadow-xl transition-all hover:-translate-y-1">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-600 mb-1">
-                                Gastos del Mes
-                            </p>
-                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 leading-tight">
+                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-red-100 hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-gray-600 mb-1">Gastos del Mes</p>
+                            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 leading-tight break-words">
                                 {formatCurrency(resumenFinanciero.totalGastos)}
                             </p>
-                            <p className="text-xs text-gray-500 mt-2">
-                                Gastos operativos
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">Gastos operativos</p>
                         </div>
-                        <div className="bg-gradient-to-br from-orange-400 to-red-600 w-14 h-14 rounded-full flex items-center justify-center shadow-md">
-                            <TrendingDown className="h-7 w-7 text-white" />
+                        <div className="flex-shrink-0 bg-gradient-to-br from-orange-400 to-red-600 w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-md">
+                            <TrendingDown className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                         </div>
                     </div>
                 </div>
-                <div className={`bg-white rounded-xl shadow-lg p-6 border ${
+                <div className={`bg-white rounded-xl shadow-lg p-4 sm:p-6 border ${
                     resumenFinanciero.gananciaNeta >= 0 ? 'border-cyan-100' : 'border-orange-100'
                 } hover:shadow-xl transition-all hover:-translate-y-1`}>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-600 mb-1">
-                                Ganancia Neta
-                            </p>
-                            <p className={`text-xl sm:text-2xl lg:text-3xl font-bold leading-tight ${
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-gray-600 mb-1">Ganancia Neta</p>
+                            <p className={`text-lg sm:text-xl lg:text-2xl font-bold leading-tight break-words ${
                                 resumenFinanciero.gananciaNeta >= 0 ? 'text-cyan-600' : 'text-orange-600'
                             }`}>
                                 {formatCurrency(resumenFinanciero.gananciaNeta)}
                             </p>
-                            <p className="text-xs text-gray-500 mt-2">
-                                Ingresos - Gastos
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">Ingresos - Gastos</p>
                         </div>
-                        <div className={`bg-gradient-to-br ${
+                        <div className={`flex-shrink-0 bg-gradient-to-br ${
                             resumenFinanciero.gananciaNeta >= 0
                                 ? 'from-cyan-500 to-blue-600'
                                 : 'from-orange-400 to-red-500'
-                        } w-14 h-14 rounded-full flex items-center justify-center shadow-md`}>
-                            <DollarSign className="h-7 w-7 text-white" />
+                        } w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-md`}>
+                            <DollarSign className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                         </div>
                     </div>
                 </div>
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-blue-100 hover:shadow-xl transition-all hover:-translate-y-1">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-600 mb-1">
-                                Margen de Ganancia
-                            </p>
-                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 leading-tight">
+                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-blue-100 hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-gray-600 mb-1">Margen de Ganancia</p>
+                            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600 leading-tight">
                                 {resumenFinanciero.margenGanancia.toFixed(1)}%
                             </p>
-                            <p className="text-xs text-gray-500 mt-2">
-                                Porcentaje de rentabilidad
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">Porcentaje de rentabilidad</p>
                         </div>
-                        <div className="bg-gradient-to-br from-blue-400 to-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-md">
-                            <TrendingUp className="h-7 w-7 text-white" />
+                        <div className="flex-shrink-0 bg-gradient-to-br from-blue-400 to-indigo-600 w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-md">
+                            <TrendingUp className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                         </div>
                     </div>
                 </div>
@@ -274,26 +258,26 @@ export default function DashboardPage() {
                                             }
                                         }}
                                     >
-                                        <div className="flex items-center gap-3 flex-1">
-                                            <div className={`p-2 rounded-full ${
+                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <div className={`flex-shrink-0 p-1.5 rounded-full ${
                                                 movimiento.tipo === 'ingreso'
                                                     ? isIngresoPendiente ? 'bg-orange-100' : 'bg-green-100'
                                                     : 'bg-red-100'
                                             }`}>
                                                 {movimiento.tipo === 'ingreso' ? (
-                                                    <ArrowUpCircle className={`h-5 w-5 ${isIngresoPendiente ? 'text-orange-600' : 'text-green-600'}`} />
+                                                    <ArrowUpCircle className={`h-4 w-4 ${isIngresoPendiente ? 'text-orange-600' : 'text-green-600'}`} />
                                                 ) : (
-                                                    <ArrowDownCircle className="h-5 w-5 text-red-600" />
+                                                    <ArrowDownCircle className="h-4 w-4 text-red-600" />
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-medium text-gray-900 text-sm truncate">
                                                     {movimiento.descripcion}
                                                 </p>
-                                                <div className="flex items-center gap-2 mt-1">
+                                                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                                                     {movimiento.categoria && (
                                                         <span
-                                                            className="text-xs px-2 py-0.5 rounded-full"
+                                                            className="text-xs px-1.5 py-0.5 rounded-full truncate max-w-[110px]"
                                                             style={{
                                                                 backgroundColor: movimiento.tipo === 'gasto' && movimiento.color
                                                                     ? `${movimiento.color}20`
@@ -310,14 +294,14 @@ export default function DashboardPage() {
                                                             {formatCategoria(movimiento.categoria)}
                                                         </span>
                                                     )}
-                                                    <span className="text-xs text-gray-500">
+                                                    <span className="text-xs text-gray-500 whitespace-nowrap">
                                                         {format(parseISO(movimiento.fecha), 'dd MMM', { locale: es })}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="text-right ml-3">
-                                            <p className={`text-sm font-bold ${
+                                        <div className="flex-shrink-0 text-right ml-2">
+                                            <p className={`text-xs sm:text-sm font-bold whitespace-nowrap ${
                                                 movimiento.tipo === 'ingreso'
                                                     ? isIngresoPendiente ? 'text-orange-600' : 'text-green-600'
                                                     : 'text-red-600'
