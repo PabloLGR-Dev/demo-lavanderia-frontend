@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function LoginPage() {
     const [usernameOrEmail, setUsernameOrEmail] = useState('');
@@ -13,6 +13,13 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showDemo, setShowDemo] = useState(false);
+
+    const fillCredentials = (username: string, pwd: string) => {
+        setUsernameOrEmail(username);
+        setPassword(pwd);
+        setShowDemo(false);
+    };
 
     const { login } = useAuth();
 
@@ -190,7 +197,44 @@ export default function LoginPage() {
                             </button>
                         </form>
 
-                        <div className="mt-8 text-center">
+                        <div className="mt-6">
+                            <button
+                                type="button"
+                                onClick={() => setShowDemo(!showDemo)}
+                                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-all text-sm font-medium"
+                            >
+                                {showDemo ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                Credenciales de demo
+                            </button>
+
+                            {showDemo && (
+                                <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-4 space-y-3">
+                                    {[
+                                        { role: 'Administrador', username: 'admin', password: 'P@ssw0rd' },
+                                        { role: 'Empleado', username: 'empleado', password: 'P@ssw0rd' },
+                                    ].map((cred) => (
+                                        <div key={cred.role} className="flex items-center justify-between bg-white rounded-lg px-4 py-3 shadow-sm border border-blue-100">
+                                            <div>
+                                                <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">{cred.role}</p>
+                                                <p className="text-sm text-gray-700 mt-0.5">
+                                                    <span className="text-gray-500">Usuario:</span> <span className="font-medium">{cred.username}</span>
+                                                    <span className="ml-3 text-gray-500">Clave:</span> <span className="font-medium">{cred.password}</span>
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => fillCredentials(cred.username, cred.password)}
+                                                className="ml-3 shrink-0 px-3 py-1.5 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+                                            >
+                                                Usar
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-5 text-center">
                             <Link
                                 href="/forgot-password"
                                 className="text-blue-600 hover:text-blue-800 font-medium text-sm hover:underline"
